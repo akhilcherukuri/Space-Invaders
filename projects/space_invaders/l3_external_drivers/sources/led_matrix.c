@@ -10,6 +10,7 @@
 #include <string.h>
 
 /* External Includes */
+#include "delay.h"
 #include "gpio.h"
 
 /***********************************************************************************************************************
@@ -51,6 +52,11 @@ static void led_matrix__private_disable_display(void) { gpio__reset(OE); }
 static void led_matrix__private_enable_latch(void) { gpio__set(LAT); }
 
 static void led_matrix__private_disable_latch(void) { gpio__reset(LAT); }
+
+static void led_matrix__private_clock_in_current_row_data(void) {
+  gpio__set(CLK);
+  gpio__reset(CLK);
+}
 
 static void led_matrix__private_select_row(uint8_t row) {
   (row & 0x01) ? gpio__set(A) : gpio__reset(A);
@@ -102,13 +108,13 @@ void led_matrix__initialize() {
   led_matrix__private_disable_display();
   led_matrix__private_disable_latch();
 
-  memset(matrix_buffer, 0, MATRIX_HEIGHT * MATRIX_ROWS);
+  memset(matrix_buffer, 0, sizeof(matrix_buffer));
 }
 
 void led_matrix__display_pixels(void) {
   for (uint8_t row = 0; row < 32; row++) {
-    led_matrix__private_disable_latch();
     led_matrix__private_disable_display();
+    led_matrix__private_disable_latch();
     for (uint8_t column = 0; column < 64; column++) {
       (matrix_buffer[row][column] & 0x1) ? gpio__set(B1) : gpio__reset(B1);
       (matrix_buffer[row][column] & 0x2) ? gpio__set(G1) : gpio__reset(G1);
@@ -117,52 +123,52 @@ void led_matrix__display_pixels(void) {
       (matrix_buffer[row][column] & 0x10) ? gpio__set(G2) : gpio__reset(G2);
       (matrix_buffer[row][column] & 0x20) ? gpio__set(R2) : gpio__reset(R2);
 
-      gpio__set(CLK);
-      gpio__reset(CLK);
+      led_matrix__private_clock_in_current_row_data();
     }
-    led_matrix__private_enable_display();
     led_matrix__private_enable_latch();
+    led_matrix__private_enable_display();
     led_matrix__private_select_row(row);
   }
 }
 
-void led_matrix__clear_display(led_color_e color) {
+void led_matrix__clear_display(void) {
   for (uint8_t row = 0; row < 32; row++) {
     for (uint8_t column = 0; column < 64; column++) {
-      // matrix_buffer[row][column] = 0;
-      led_matrix__clear_pixel(row, column, color);
+      matrix_buffer[row][column] = 0;
     }
   }
 }
 
 void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color) {
 
-  if ((row < 0) || (row > 63))
-    return;
-  if ((column < 0) || (column > 63))
+  // Check if row and column are outbounds
+  if ((row < 0) || (row > 63) || (column < 0) || (column > 63))
     return;
 
   if (row > 31) {
     row = row - 32;
     color = color << 3;
-    matrix_buffer[row][column] = (matrix_buffer[row][column] & 0x07) | color;
+    // matrix_buffer[row][column] |= (matrix_buffer[row][column] & 0x07) | color;
+    matrix_buffer[row][column] |= color;
   } else {
-    matrix_buffer[row][column] = (matrix_buffer[row][column] & 0x38) | color;
+    // matrix_buffer[row][column] |= (matrix_buffer[row][column] & 0x38) | color;
+    matrix_buffer[row][column] |= color;
   }
 }
 
 void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color) {
 
-  if ((row < 0) || (row > 63))
-    return;
-  if ((column < 0) || (column > 63))
+  // Check if row and column are outbounds
+  if ((row < 0) || (row > 63) || (column < 0) || (column > 63))
     return;
 
   if (row > 31) {
     row = row - 32;
     color = color << 3;
-    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x07) | color);
+    // matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x07) | color);
+    matrix_buffer[row][column] &= ~(color);
   } else {
-    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x38) | color);
+    // matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x38) | color);
+    matrix_buffer[row][column] &= ~(color);
   }
 }

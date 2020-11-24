@@ -44,6 +44,6 @@ typedef enum {
 
 void led_matrix__initialize(void);
 void led_matrix__display_pixels(void);
-void led_matrix__clear_display(led_color_e color);
+void led_matrix__clear_display(void);
 void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color);
 void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color);
