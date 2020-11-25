@@ -202,45 +202,38 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
   switch (letter) {
   case 'a':
   case 'A':
-    for (uint8_t i = 2; i < 4; i++) {
-      led_matrix__set_pixel(row + i, column, color);
-      led_matrix__set_pixel(row + i, column + 4, color);
-    }
-    for (uint8_t i = 1; i < 5; i++) {
-      led_matrix__set_pixel(row + i, column + 1, color);
-    }
-    for (uint8_t i = 2; i < 7; i++) {
-      led_matrix__set_pixel(row + i, column, color);
-      led_matrix__set_pixel(row + i, column + 1, color);
-      led_matrix__set_pixel(row + i, column + 4, color);
-      led_matrix__set_pixel(row + i, column + 5, color);
-    }
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 'b':
   case 'B':
-    for (uint8_t i = 0; i < 6; i++) {
-      led_matrix__set_pixel(row, column + i, color);
-      led_matrix__set_pixel(row + 6, column + i, color);
-    }
-    for (uint8_t i = 1; i < 3; i++) {
-      led_matrix__set_pixel(row + i, column + 1, color);
-      led_matrix__set_pixel(row + i, column + 2, color);
-      led_matrix__set_pixel(row + i, column + 5, color);
-      led_matrix__set_pixel(row + i, column + 6, color);
-    }
-    for (uint8_t i = 4; i < 6; i++) {
-      led_matrix__set_pixel(row + i, column + 1, color);
-      led_matrix__set_pixel(row + i, column + 2, color);
-      led_matrix__set_pixel(row + i, column + 5, color);
-      led_matrix__set_pixel(row + i, column + 6, color);
-    }
-    for (uint8_t i = 1; i < 6; i++) {
-      led_matrix__set_pixel(row + 3, column + i, color);
-    }
+    /* code */
     break;
   case 'c':
   case 'C':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 'd':
   case 'D':
@@ -249,6 +242,20 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
   case 'e':
   case 'E':
     /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 'f':
   case 'F':
@@ -256,7 +263,20 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'g':
   case 'G':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 'h':
   case 'H':
@@ -280,7 +300,19 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'm':
   case 'M':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 4, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 1, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 4, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 4, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 4, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 4, color);
     break;
   case 'n':
   case 'N':
@@ -288,11 +320,35 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'o':
   case 'O':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 'p':
   case 'P':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
     break;
   case 'q':
   case 'Q':
@@ -300,15 +356,49 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'r':
   case 'R':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 's':
   case 'S':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 3, color);
     break;
   case 't':
   case 'T':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 1, color);
+    led_matrix__set_pixel(row + 0, column + 2, color);
+    led_matrix__set_pixel(row + 0, column + 3, color);
+    led_matrix__set_pixel(row + 0, column + 4, color);
+    led_matrix__set_pixel(row + 1, column + 2, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 3, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
     break;
   case 'u':
   case 'U':
@@ -316,7 +406,15 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'v':
   case 'V':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 4, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 4, color);
+    led_matrix__set_pixel(row + 2, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 3, color);
+    led_matrix__set_pixel(row + 3, column + 1, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
     break;
   case 'w':
   case 'W':
@@ -337,4 +435,56 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
   default:
     break;
   }
+}
+
+void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column) {
+  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'C', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'O', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+}
+
+void led_matrix_basic_graphics__display_word_pressStart(uint8_t row, uint8_t column) {
+  led_matrix_basic_graphics__display_letter(row, column, 'P', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  column += 8;
+  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'T', RED);
+  column += 6;
+  led_matrix_basic_graphics__display_letter(row, column, 'A', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'T', RED);
+}
+
+void led_matrix_basic_graphics__display_word_gameOver(uint8_t row, uint8_t column) {
+  led_matrix_basic_graphics__display_letter(row, column, 'G', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'A', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'M', RED);
+  column += 6;
+  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  column += 8;
+  led_matrix_basic_graphics__display_letter(row, column, 'O', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'V', RED);
+  column += 6;
+  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
 }

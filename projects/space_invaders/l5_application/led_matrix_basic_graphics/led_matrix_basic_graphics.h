@@ -32,3 +32,7 @@
 
 void led_matrix_basic_graphics__display_number(uint8_t row, uint8_t column, uint8_t number, led_color_e color);
 void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char letter, led_color_e color);
+
+void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column);
+void led_matrix_basic_graphics__display_word_pressStart(uint8_t row, uint8_t column);
+void led_matrix_basic_graphics__display_word_gameOver(uint8_t row, uint8_t column);

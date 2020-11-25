@@ -86,9 +86,9 @@ void led_matrix__initialize() {
   D = gpio__construct_as_output(GPIO__PORT_0, 16);
   E = gpio__construct_as_output(GPIO__PORT_0, 15);
 
-  CLK = gpio__construct_as_output(GPIO__PORT_1, 20);
-  OE = gpio__construct_as_output(GPIO__PORT_1, 23);
-  LAT = gpio__construct_as_output(GPIO__PORT_1, 30);
+  CLK = gpio__construct_as_output(GPIO__PORT_1, 30); // 20
+  OE = gpio__construct_as_output(GPIO__PORT_1, 29);  // 23
+  LAT = gpio__construct_as_output(GPIO__PORT_1, 28); // 30
 
   gpio__reset(R1);
   gpio__reset(G1);
