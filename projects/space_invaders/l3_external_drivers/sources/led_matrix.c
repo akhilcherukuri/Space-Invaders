@@ -65,6 +65,8 @@ static void led_matrix__private_select_row(uint8_t row) {
   (row & 0x08) ? gpio__set(D) : gpio__reset(D);
   (row & 0x10) ? gpio__set(E) : gpio__reset(E);
 }
+
+static void led_matrix__private_get_color_for_bottom_half_of_display(led_color_e *color) { *color = *color << 3; }
 /***********************************************************************************************************************
  *
  *                                          P U B L I C   F U N C T I O N S
@@ -86,9 +88,9 @@ void led_matrix__initialize() {
   D = gpio__construct_as_output(GPIO__PORT_0, 16);
   E = gpio__construct_as_output(GPIO__PORT_0, 15);
 
-  CLK = gpio__construct_as_output(GPIO__PORT_1, 30); // 20
-  OE = gpio__construct_as_output(GPIO__PORT_1, 29);  // 23
-  LAT = gpio__construct_as_output(GPIO__PORT_1, 28); // 30
+  CLK = gpio__construct_as_output(GPIO__PORT_0, 17);
+  OE = gpio__construct_as_output(GPIO__PORT_0, 22);
+  LAT = gpio__construct_as_output(GPIO__PORT_0, 0);
 
   gpio__reset(R1);
   gpio__reset(G1);
@@ -141,34 +143,30 @@ void led_matrix__clear_display(void) {
 
 void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color) {
 
-  // Check if row and column are outbounds
+  // Check if row or column are outbounds
   if ((row < 0) || (row > 63) || (column < 0) || (column > 63))
     return;
 
   if (row > 31) {
     row = row - 32;
-    color = color << 3;
-    // matrix_buffer[row][column] |= (matrix_buffer[row][column] & 0x07) | color;
+    led_matrix__private_get_color_for_bottom_half_of_display(&color);
     matrix_buffer[row][column] |= color;
   } else {
-    // matrix_buffer[row][column] |= (matrix_buffer[row][column] & 0x38) | color;
     matrix_buffer[row][column] |= color;
   }
 }
 
 void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color) {
 
-  // Check if row and column are outbounds
+  // Check if row or column are outbounds
   if ((row < 0) || (row > 63) || (column < 0) || (column > 63))
     return;
 
   if (row > 31) {
     row = row - 32;
-    color = color << 3;
-    // matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x07) | color);
+    led_matrix__private_get_color_for_bottom_half_of_display(&color);
     matrix_buffer[row][column] &= ~(color);
   } else {
-    // matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & 0x38) | color);
     matrix_buffer[row][column] &= ~(color);
   }
 }
