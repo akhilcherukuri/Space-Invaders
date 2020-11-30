@@ -10,7 +10,6 @@
 #include <string.h>
 
 /* External Includes */
-#include "delay.h"
 #include "gpio.h"
 
 /***********************************************************************************************************************
@@ -38,6 +37,8 @@
  **********************************************************************************************************************/
 
 static gpio_s R1, G1, B1, R2, G2, B2, A, B, C, D, E, CLK, OE, LAT;
+static uint8_t bottom_half_of_display_mask = 0x07;
+static uint8_t upper_half_of_display_mask = 0x38;
 
 /***********************************************************************************************************************
  *
@@ -89,8 +90,8 @@ void led_matrix__initialize() {
   E = gpio__construct_as_output(GPIO__PORT_0, 15);
 
   CLK = gpio__construct_as_output(GPIO__PORT_0, 17);
-  OE = gpio__construct_as_output(GPIO__PORT_0, 22);
-  LAT = gpio__construct_as_output(GPIO__PORT_0, 0);
+  OE = gpio__construct_as_output(GPIO__PORT_1, 28);
+  LAT = gpio__construct_as_output(GPIO__PORT_1, 29);
 
   gpio__reset(R1);
   gpio__reset(G1);
@@ -150,9 +151,9 @@ void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color) {
   if (row > 31) {
     row = row - 32;
     led_matrix__private_get_color_for_bottom_half_of_display(&color);
-    matrix_buffer[row][column] |= color;
+    matrix_buffer[row][column] = (matrix_buffer[row][column] & bottom_half_of_display_mask) | color;
   } else {
-    matrix_buffer[row][column] |= color;
+    matrix_buffer[row][column] = (matrix_buffer[row][column] & upper_half_of_display_mask) | color;
   }
 }
 
@@ -165,8 +166,8 @@ void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color) {
   if (row > 31) {
     row = row - 32;
     led_matrix__private_get_color_for_bottom_half_of_display(&color);
-    matrix_buffer[row][column] &= ~(color);
+    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & bottom_half_of_display_mask) | color);
   } else {
-    matrix_buffer[row][column] &= ~(color);
+    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & upper_half_of_display_mask) | color);
   }
 }
