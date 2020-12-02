@@ -7,6 +7,7 @@
 /* Standard Includes */
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* External Includes */
 
@@ -24,7 +25,7 @@
  *                                                  T Y P E D E F S
  *
  **********************************************************************************************************************/
-typedef enum { LASER_CANNON, OCTOPUS, CRAB, SQUID } enemy_entity_e;
+typedef enum { LASER_CANNON, OCTOPUS, CRAB, SQUID, LASER_CANNON_BULLET, ENEMY_BULLET } enemy_entity_e;
 
 typedef enum { LEFT, RIGHT } enemy_direction_e;
 
@@ -45,3 +46,4 @@ typedef struct {
 void game_logic__initialize(void);
 void game_logic__move_laser_cannon(void);
 void game_logic__move_enemies(void);
+bool game_logic__is_game_over_status(bool is_game_over); // TODO Add more status variable as need (Add start bool)

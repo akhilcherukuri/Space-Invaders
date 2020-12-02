@@ -217,6 +217,11 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 }
 
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {}
+
+// TODO: Add private function for shooting bullet from laser cannon
+// TODO: Add private function for having enemies randomly shooting
+// TODO: Add score counter logic
+
 /***********************************************************************************************************************
  *
  *                                          P U B L I C   F U N C T I O N S
@@ -266,6 +271,6 @@ void game_logic__move_enemies(void) {
         game_logic__private_display_enemy(&enemies_array[i][j]);
       }
     }
-    vTaskDelay(1 * speed_delay_ms); // TODO: Enemies speed = (Num_enemies_left * Const delay in ms)
+    vTaskDelay(8 * speed_delay_ms); // TODO: Enemies speed = (Num_enemies_left * Const delay in ms)
   }
 }
