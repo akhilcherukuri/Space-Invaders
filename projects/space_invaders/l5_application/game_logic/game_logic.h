@@ -5,9 +5,9 @@
  *
  **********************************************************************************************************************/
 /* Standard Includes */
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdbool.h>
 
 /* External Includes */
 
@@ -27,7 +27,7 @@
  **********************************************************************************************************************/
 typedef enum { LASER_CANNON, OCTOPUS, CRAB, SQUID, LASER_CANNON_BULLET, ENEMY_BULLET } enemy_entity_e;
 
-typedef enum { LEFT, RIGHT } enemy_direction_e;
+typedef enum { LEFT, RIGHT, UP, DOWN } enemy_direction_e;
 
 typedef struct {
   int column_position;

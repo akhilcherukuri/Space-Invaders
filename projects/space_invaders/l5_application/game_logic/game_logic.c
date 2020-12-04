@@ -23,6 +23,7 @@
  **********************************************************************************************************************/
 #define MAX_ROW_OF_ENEMIES 3
 #define MAX_NUM_OF_ENEMIES 4
+#define MAX_NUM_OF_BULLETS 9 //(64 rows - 13 rows from cannon)/5
 
 bool is_game_over = false;
 gpio_s start_button, shooting_button;
@@ -79,6 +80,8 @@ static const int game_over_row_boundary = laser_cannon_start_row_position - lase
 static const int speed_delay_ms = 30;
 static const int number_of_enemies_left;
 
+static game_object_s bullets_array[MAX_NUM_OF_BULLETS] = {53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED};
+static uint8_t valid_bullet[MAX_NUM_OF_BULLETS] = {0};
 /***********************************************************************************************************************
  *
  *                                         P R I V A T E   F U N C T I O N S
@@ -219,6 +222,29 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {}
 
 // TODO: Add private function for shooting bullet from laser cannon
+void game_logic__shoot_bullet(void) {
+  if (gpio__get(shooting_button) == 1) {
+    for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
+      if (valid_bullet[i] == 0) {
+        valid_bullet[i] == 1;
+        bullets_array[i].row_position = laser_cannon.row_position + 6;
+        bullets_array[i].row_position = laser_cannon.column_position + 6;
+        game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
+                                                   bullets_array[i].color);
+      }
+    }
+  }
+}
+
+void game_logic__update_bullet__location(void) {
+  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
+    if (valid_bullet[i] == 1) {
+      bullets_array[i].row_position = laser_cannon.row_position + 1;
+      game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
+                                                 bullets_array[i].color);
+    }
+  }
+}
 // TODO: Add private function for having enemies randomly shooting
 // TODO: Add score counter logic
 
