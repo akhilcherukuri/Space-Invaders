@@ -46,4 +46,6 @@ typedef struct {
 void game_logic__initialize(void);
 void game_logic__move_laser_cannon(void);
 void game_logic__move_enemies(void);
-bool game_logic__is_game_over_status(bool is_game_over); // TODO Add more status variable as need (Add start bool)
+bool game_logic__is_game_over_status(void); // TODO Add more status variable as need (Add start bool)
+void game_logic__shoot_bullet(void);
+void game_logic__update_bullet_location(void);

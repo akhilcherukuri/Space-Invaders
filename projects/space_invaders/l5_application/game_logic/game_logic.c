@@ -25,8 +25,6 @@
 #define MAX_NUM_OF_ENEMIES 4
 #define MAX_NUM_OF_BULLETS 9 //(64 rows - 13 rows from cannon)/5
 
-bool is_game_over = false;
-gpio_s start_button, shooting_button;
 /***********************************************************************************************************************
  *
  *                                                  T Y P E D E F S
@@ -45,7 +43,11 @@ gpio_s start_button, shooting_button;
  *
  **********************************************************************************************************************/
 
-static gpio_s joystick_left, joystick_right;
+static bool is_game_over = false;
+
+static bool is_game_started = false;
+
+static gpio_s joystick_left, joystick_right, start_button, shooting_button;
 
 static const int laser_cannon_start_column_position = 26;
 static const int laser_cannon_start_row_position = 53;
@@ -80,7 +82,7 @@ static const int game_over_row_boundary = laser_cannon_start_row_position - lase
 static const int speed_delay_ms = 30;
 static const int number_of_enemies_left;
 
-static game_object_s bullets_array[MAX_NUM_OF_BULLETS] = {53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED};
+static game_object_s bullets_array[MAX_NUM_OF_BULLETS] = {{53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED}};
 static uint8_t valid_bullet[MAX_NUM_OF_BULLETS] = {0};
 /***********************************************************************************************************************
  *
@@ -222,29 +224,7 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {}
 
 // TODO: Add private function for shooting bullet from laser cannon
-void game_logic__shoot_bullet(void) {
-  if (gpio__get(shooting_button) == 1) {
-    for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
-      if (valid_bullet[i] == 0) {
-        valid_bullet[i] == 1;
-        bullets_array[i].row_position = laser_cannon.row_position + 6;
-        bullets_array[i].row_position = laser_cannon.column_position + 6;
-        game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
-                                                   bullets_array[i].color);
-      }
-    }
-  }
-}
 
-void game_logic__update_bullet__location(void) {
-  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
-    if (valid_bullet[i] == 1) {
-      bullets_array[i].row_position = laser_cannon.row_position + 1;
-      game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
-                                                 bullets_array[i].color);
-    }
-  }
-}
 // TODO: Add private function for having enemies randomly shooting
 // TODO: Add score counter logic
 
@@ -261,9 +241,13 @@ void game_logic__initialize(void) {
 
   joystick_left = gpio__construct_as_input(GPIO__PORT_1, 30);
   joystick_right = gpio__construct_as_input(GPIO__PORT_1, 31);
+  start_button = gpio__construct_as_input(GPIO__PORT_0, 26);
+  shooting_button = gpio__construct_as_input(GPIO__PORT_0, 25);
 
   gpio__reset(joystick_right);
   gpio__reset(joystick_left);
+  // gpio__reset(start_button);
+  // gpio__reset(shooting_button);
 
   memset(enemies_array, 0, sizeof(enemies_array));
 
@@ -298,5 +282,36 @@ void game_logic__move_enemies(void) {
       }
     }
     vTaskDelay(8 * speed_delay_ms); // TODO: Enemies speed = (Num_enemies_left * Const delay in ms)
+  }
+}
+
+bool game_logic__is_game_over_status(void) { return is_game_over; }
+
+void game_logic__shoot_bullet(void) {
+  const uint8_t offset_cannon_row_center = 6;
+  const uint8_t offset_cannon_column_center = 6;
+  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
+    if (valid_bullet[i] == 0) {
+      valid_bullet[i] = 1;
+      bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
+      bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
+      break;
+    }
+  }
+}
+
+void game_logic__update_bullet_location(void) {
+  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
+    if (valid_bullet[i] == 1) {
+      game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
+                                                 BLACK);
+      if (bullets_array[i].row_position != 0) {
+        bullets_array[i].row_position--;
+        game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
+                                                   bullets_array[i].color);
+      } else {
+        valid_bullet[i] = 0;
+      }
+    }
   }
 }

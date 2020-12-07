@@ -492,7 +492,7 @@ void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column) 
   led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
 }
 
-void led_matrix_basic_graphics__display_word_press_start(uint8_t row, uint8_t column) {
+void led_matrix_basic_graphics__display_word_press_red_button(uint8_t row, uint8_t column) {
   led_matrix_basic_graphics__display_letter(row, column, 'P', RED);
   column += 5;
   led_matrix_basic_graphics__display_letter(row, column, 'R', RED);

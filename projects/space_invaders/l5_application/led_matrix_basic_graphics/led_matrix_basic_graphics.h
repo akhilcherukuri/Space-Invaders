@@ -34,5 +34,5 @@ void led_matrix_basic_graphics__display_number(uint8_t row, uint8_t column, uint
 void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char letter, led_color_e color);
 
 void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column);
-void led_matrix_basic_graphics__display_word_press_start(uint8_t row, uint8_t column);
+void led_matrix_basic_graphics__display_word_press_red_button(uint8_t row, uint8_t column);
 void led_matrix_basic_graphics__display_word_game_over(uint8_t row, uint8_t column);
