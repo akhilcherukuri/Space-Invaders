@@ -37,6 +37,7 @@ typedef struct {
   int height;
   enemy_entity_e entity;
   led_color_e color;
+  bool is_valid;
 } game_object_s;
 /***********************************************************************************************************************
  *
@@ -51,3 +52,4 @@ void game_logic__set_game_over_status(bool status); // TODO Add more status vari
 void game_logic__shoot_bullet(void);
 void game_logic__update_bullet_location(void);
 void game_logic__respawn_enemies(void);
+void game_logic__check_valid_enemy_to_shoot_bullet(void);

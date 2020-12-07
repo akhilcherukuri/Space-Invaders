@@ -29,6 +29,7 @@ static TaskHandle_t game_over_screen_task_handle;
 static TaskHandle_t move_laser_cannon_task_handle;
 static TaskHandle_t move_enemies_task_handle;
 static TaskHandle_t laser_cannon_shooting_task_handle;
+static TaskHandle_t enemy_shooting_task_handle;
 
 uint64_t button_pressed_time = 0;
 uint64_t button_last_time_pressed = 0;
@@ -41,6 +42,7 @@ void start_screen_task(void *p);
 void game_over_screen_task(void *p);
 void move_laser_cannon_task(void *p);
 void move_enemies_task(void *p);
+void enemy_shooting_task(void *p);
 void laser_cannon_shooting_task(void *p);
 
 int main(void) {
@@ -63,6 +65,8 @@ int main(void) {
               &move_enemies_task_handle);
   xTaskCreate(laser_cannon_shooting_task, "laser cannon shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
               &laser_cannon_shooting_task_handle);
+  xTaskCreate(enemy_shooting_task, "enemy task for shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
+              &enemy_shooting_task_handle);
 
   sj2_cli__init();
   puts("Starting RTOS");
@@ -96,6 +100,7 @@ void start_screen_task(void *p) {
       vTaskSuspend(move_laser_cannon_task_handle);
       vTaskSuspend(laser_cannon_shooting_task_handle);
       vTaskSuspend(move_enemies_task_handle);
+      vTaskSuspend(enemy_shooting_task_handle);
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
         led_matrix__clear_display();
@@ -103,6 +108,7 @@ void start_screen_task(void *p) {
         vTaskResume(move_laser_cannon_task_handle);
         vTaskResume(laser_cannon_shooting_task_handle);
         vTaskResume(move_enemies_task_handle);
+        vTaskResume(enemy_shooting_task_handle);
         vTaskSuspend(start_screen_task_handle);
       }
     }
@@ -119,6 +125,7 @@ void game_over_screen_task(void *p) {
       vTaskSuspend(move_laser_cannon_task_handle);
       vTaskSuspend(laser_cannon_shooting_task_handle);
       vTaskSuspend(move_enemies_task_handle);
+      vTaskSuspend(enemy_shooting_task_handle);
       led_matrix__clear_display();
       game_graphics__display_game_over_screen();
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
@@ -143,6 +150,13 @@ void move_laser_cannon_task(void *p) {
 void move_enemies_task(void *p) {
   while (1) {
     game_logic__move_enemies();
+    vTaskDelay(3);
+  }
+}
+
+void enemy_shooting_task(void *p) {
+  while (1) {
+    game_logic__check_valid_enemy_to_shoot_bullet();
     vTaskDelay(3);
   }
 }
