@@ -23,8 +23,7 @@
  **********************************************************************************************************************/
 #define MAX_ROW_OF_ENEMIES 3
 #define MAX_NUM_OF_ENEMIES 4
-#define MAX_NUM_OF_BULLETS 9 //(64 rows - 13 rows from cannon)/5
-
+#define MAX_NUM_OF_CANNON_BULLETS 9 //(64 rows - 13 rows from cannon)/5
 /***********************************************************************************************************************
  *
  *                                                  T Y P E D E F S
@@ -82,8 +81,9 @@ static const int game_over_row_boundary = laser_cannon_start_row_position - lase
 static const int speed_delay_ms = 30;
 static const int number_of_enemies_left;
 
-static game_object_s bullets_array[MAX_NUM_OF_BULLETS] = {{53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED}};
-static uint8_t valid_bullet[MAX_NUM_OF_BULLETS] = {0};
+static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS] = {{53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED}};
+static uint8_t cannon_valid_bullet[MAX_NUM_OF_CANNON_BULLETS] = {0};
+
 /***********************************************************************************************************************
  *
  *                                         P R I V A T E   F U N C T I O N S
@@ -223,8 +223,6 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {}
 
-// TODO: Add private function for shooting bullet from laser cannon
-
 // TODO: Add private function for having enemies randomly shooting
 // TODO: Add score counter logic
 
@@ -235,10 +233,6 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game
  **********************************************************************************************************************/
 
 void game_logic__initialize(void) {
-  uint8_t squid_row = 0;
-  uint8_t crab_row = 1;
-  uint8_t octopus_row = 2;
-
   joystick_left = gpio__construct_as_input(GPIO__PORT_1, 30);
   joystick_right = gpio__construct_as_input(GPIO__PORT_1, 31);
   start_button = gpio__construct_as_input(GPIO__PORT_0, 26);
@@ -246,14 +240,11 @@ void game_logic__initialize(void) {
 
   gpio__reset(joystick_right);
   gpio__reset(joystick_left);
-  // gpio__reset(start_button);
-  // gpio__reset(shooting_button);
+  gpio__reset(start_button);
+  gpio__reset(shooting_button);
 
   memset(enemies_array, 0, sizeof(enemies_array));
-
-  game_logic__private_spawn_squid(squid_row);
-  game_logic__private_spawn_crab(crab_row);
-  game_logic__private_spawn_octupus(octopus_row);
+  (void)game_logic__respawn_enemies();
 }
 
 void game_logic__move_laser_cannon(void) {
@@ -285,33 +276,47 @@ void game_logic__move_enemies(void) {
   }
 }
 
-bool game_logic__is_game_over_status(void) { return is_game_over; }
+bool game_logic__get_game_over_status(void) { return is_game_over; }
+void game_logic__set_game_over_status(bool status) { is_game_over = status; }
 
 void game_logic__shoot_bullet(void) {
   const uint8_t offset_cannon_row_center = 6;
   const uint8_t offset_cannon_column_center = 6;
-  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
-    if (valid_bullet[i] == 0) {
-      valid_bullet[i] = 1;
-      bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
-      bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
+  for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
+    if (cannon_valid_bullet[i] == 0) {
+      cannon_valid_bullet[i] = 1;
+      cannon_bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
+      cannon_bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
       break;
     }
   }
 }
 
 void game_logic__update_bullet_location(void) {
-  for (size_t i = 0; i < MAX_NUM_OF_BULLETS; i++) {
-    if (valid_bullet[i] == 1) {
-      game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
-                                                 BLACK);
-      if (bullets_array[i].row_position != 0) {
-        bullets_array[i].row_position--;
-        game_graphics__display_laser_cannon_bullet(bullets_array[i].row_position, bullets_array[i].column_position,
-                                                   bullets_array[i].color);
+  for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
+    if (cannon_valid_bullet[i] == 1) {
+      game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
+                                                 cannon_bullets_array[i].column_position, BLACK);
+      if (cannon_bullets_array[i].row_position != 0) {
+        cannon_bullets_array[i].row_position--;
+        game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
+                                                   cannon_bullets_array[i].column_position,
+                                                   cannon_bullets_array[i].color);
       } else {
-        valid_bullet[i] = 0;
+        cannon_valid_bullet[i] = 0;
       }
     }
   }
+}
+
+void game_logic__respawn_enemies(void) {
+  uint8_t squid_row = 0;
+  uint8_t crab_row = 1;
+  uint8_t octopus_row = 2;
+
+  memset(enemies_array, 0, sizeof(enemies_array));
+
+  game_logic__private_spawn_squid(squid_row);
+  game_logic__private_spawn_crab(crab_row);
+  game_logic__private_spawn_octupus(octopus_row);
 }
