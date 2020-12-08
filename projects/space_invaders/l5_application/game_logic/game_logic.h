@@ -27,9 +27,7 @@
  *
  **********************************************************************************************************************/
 typedef enum { LASER_CANNON, OCTOPUS, CRAB, SQUID, LASER_CANNON_BULLET, ENEMY_BULLET } enemy_entity_e;
-
 typedef enum { LEFT, RIGHT, UP, DOWN } enemy_direction_e;
-
 typedef bool entity_subtype_t;
 
 typedef struct {
@@ -43,6 +41,7 @@ typedef struct {
   led_color_e color;
   bool is_valid;
 } game_object_s;
+
 /***********************************************************************************************************************
  *
  *                                     F U N C T I O N   D E C L A R A T I O N S
@@ -51,8 +50,8 @@ typedef struct {
 void game_logic__initialize(void);
 void game_logic__move_laser_cannon(void);
 void game_logic__move_enemies(void);
-bool game_logic__get_game_over_status(void);        // TODO Add more status variable as need (Add start bool)
-void game_logic__set_game_over_status(bool status); // TODO Add more status variable as need (Add start bool)
+bool game_logic__get_game_over_status(void);
+void game_logic__set_game_over_status(bool status);
 void game_logic__shoot_bullet(void);
 void game_logic__update_bullet_location(void);
 void game_logic__respawn_enemies(void);
