@@ -61,7 +61,7 @@ static const int squid_row_boundary = 8;
 static const int squid_column_boundary = 8;
 static const int game_over_row_boundary = laser_cannon_start_row_position - laser_cannon_row_boundary;
 
-static const TickType_t enemies_speed_delay_ms = 30;
+static const TickType_t enemies_speed_delay_ms = 40;
 static int number_of_enemies_left;
 
 static const uint8_t led_matrix_left_boundary = 0;
@@ -253,27 +253,16 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 1) {
-      for (size_t j = 3; j > 0; --j) { // fix this
+      for (size_t j = 0; j < MAX_ROW_OF_ENEMIES; j++) {
         for (size_t k = 0; k < MAX_NUM_OF_ENEMIES; k++) {
           if ((enemies_array[j][k].column_position <= cannon_bullets_array[i].column_position) &&
               (cannon_bullets_array[i].column_position <=
-               (enemies_array[j][k].column_position + enemies_array[j][k].width))) {
-            if (enemies_array[j][k].entity == OCTOPUS) {
-              game_graphics__display_octopus(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
-                                             BLACK, enemies_array[j][k].subtype);
-            } else if (enemies_array[j][k].entity == CRAB) {
-              game_graphics__display_crab(enemies_array[j][k].row_position, enemies_array[j][k].column_position, BLACK,
-                                          enemies_array[j][k].subtype);
-            } else if (enemies_array[j][k].entity == SQUID) {
-              game_graphics__display_squid(enemies_array[j][k].row_position, enemies_array[j][k].column_position, BLACK,
-                                           enemies_array[j][k].subtype);
-            } else {
-              // do nothing
-            }
-            enemies_array[j][k].is_valid = false;
+               (enemies_array[j][k].column_position + enemies_array[j][k].width)) &&
+              enemies_array[j][k].is_valid) {
             cannon_bullets_array[i].is_valid = false;
-            // game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
-            //                                            cannon_bullets_array[i].column_position, BLACK);
+            game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
+                                                       cannon_bullets_array[i].column_position, BLACK);
+            enemies_array[j][k].is_valid = false;
             game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
                                              RED);
             vTaskDelay(15);
@@ -430,7 +419,7 @@ void game_logic__shoot_bullet(void) {
 
 void game_logic__update_bullet_location(void) {
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
-    if (cannon_bullets_array[i].is_valid == true) {
+    if (cannon_bullets_array[i].is_valid) {
       game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
                                                  cannon_bullets_array[i].column_position, BLACK);
       if (cannon_bullets_array[i].row_position != led_matrix_top_boundary) {
@@ -440,6 +429,8 @@ void game_logic__update_bullet_location(void) {
                                                    cannon_bullets_array[i].color);
       } else {
         cannon_bullets_array[i].is_valid = false;
+        game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
+                                                   cannon_bullets_array[i].column_position, BLACK);
       }
     }
   }
