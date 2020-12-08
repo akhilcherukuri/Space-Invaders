@@ -253,23 +253,24 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 1) {
-      for (size_t j = 0; j < MAX_ROW_OF_ENEMIES; j++) {
+      for (size_t j = MAX_ROW_OF_ENEMIES; j >= 0; j--) {
         for (size_t k = 0; k < MAX_NUM_OF_ENEMIES; k++) {
-          if ((enemies_array[j][k].column_position <= cannon_bullets_array[i].column_position) &&
-              (cannon_bullets_array[i].column_position <=
-               (enemies_array[j][k].column_position + enemies_array[j][k].width)) &&
-              enemies_array[j][k].is_valid) {
-            cannon_bullets_array[i].is_valid = false;
-            game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
-                                                       cannon_bullets_array[i].column_position, BLACK);
-            enemies_array[j][k].is_valid = false;
-            game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
-                                             RED);
-            vTaskDelay(15);
-            game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
-                                             BLACK);
-            number_of_enemies_left--;
-            return;
+          if (enemies_array[j][k].is_valid) {
+            if ((enemies_array[j][k].column_position <= cannon_bullets_array[i].column_position) &&
+                (cannon_bullets_array[i].column_position <=
+                 (enemies_array[j][k].column_position + enemies_array[j][k].width))) {
+              cannon_bullets_array[i].is_valid = false;
+              game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
+                                                         cannon_bullets_array[i].column_position, BLACK);
+              enemies_array[j][k].is_valid = false;
+              game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
+                                               RED);
+              vTaskDelay(15);
+              game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
+                                               BLACK);
+              number_of_enemies_left--;
+              return;
+            }
           }
         }
       }
