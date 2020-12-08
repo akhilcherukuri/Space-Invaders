@@ -19,7 +19,8 @@
  *                                                   D E F I N E S
  *
  **********************************************************************************************************************/
-
+#define ENTITY_SUBTYPE_1 true
+#define ENTITY_SUBTYPE_2 false
 /***********************************************************************************************************************
  *
  *                                                  T Y P E D E F S
@@ -29,6 +30,8 @@ typedef enum { LASER_CANNON, OCTOPUS, CRAB, SQUID, LASER_CANNON_BULLET, ENEMY_BU
 
 typedef enum { LEFT, RIGHT, UP, DOWN } enemy_direction_e;
 
+typedef bool entity_subtype_t;
+
 typedef struct {
   int column_position;
   int row_position;
@@ -36,6 +39,7 @@ typedef struct {
   int width;
   int height;
   enemy_entity_e entity;
+  entity_subtype_t subtype;
   led_color_e color;
   bool is_valid;
 } game_object_s;

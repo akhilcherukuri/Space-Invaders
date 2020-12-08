@@ -8,6 +8,7 @@
 
 /* Standard Includes */
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /* External Includes */
@@ -60,33 +61,50 @@ static const int crab_column_boundary = 11;
 static const int squid_row_boundary = 8;
 static const int squid_column_boundary = 8;
 
+static const int speed_delay_ms = 30;
+static const int number_of_enemies_left;
+
 static const uint8_t column_min_boundary = 0;
 static const uint8_t column_max_boundary = 64;
 
 static const size_t enemy_column_delta = 1;
 static const size_t enemy_row_delta = 1;
 
-static game_object_s laser_cannon = {laser_cannon_start_column_position,
-                                     laser_cannon_start_row_position,
-                                     0,
-                                     laser_cannon_column_boundary,
-                                     laser_cannon_row_boundary,
-                                     LASER_CANNON,
-                                     ELECTRIC_BLUE,
-                                     true};
+static game_object_s laser_cannon = {
+    .column_position = laser_cannon_start_column_position,
+    .row_position = laser_cannon_start_row_position,
+    .moving_direction = 0,
+    .width = laser_cannon_column_boundary,
+    .height = laser_cannon_row_boundary,
+    .subtype = true,
+    .entity = LASER_CANNON,
+    .color = ELECTRIC_BLUE,
+    .is_valid = true,
+};
 
 static game_object_s enemies_array[MAX_ROW_OF_ENEMIES][MAX_NUM_OF_ENEMIES];
 
-static game_object_s enemy_bullets_array[MAX_NUM_OF_ENEMY_BULLETS] = {
-    {53, 26, DOWN, 1, 5, ENEMY_BULLET, YELLOW, false}};
+static game_object_s enemy_bullets_array[MAX_NUM_OF_ENEMY_BULLETS] = {{.column_position = 53,
+                                                                       .row_position = 26,
+                                                                       .moving_direction = DOWN,
+                                                                       .width = 1,
+                                                                       .height = 5,
+                                                                       .subtype = true,
+                                                                       .entity = ENEMY_BULLET,
+                                                                       .color = YELLOW,
+                                                                       .is_valid = false}};
 
 static const int game_over_row_boundary = laser_cannon_start_row_position - laser_cannon_row_boundary;
 
-static const int speed_delay_ms = 30;
-static const int number_of_enemies_left;
-
-static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS] = {
-    {53, 26, UP, 1, 5, LASER_CANNON_BULLET, RED, false}};
+static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS] = {{.column_position = 53,
+                                                                         .row_position = 26,
+                                                                         .moving_direction = UP,
+                                                                         .width = 1,
+                                                                         .height = 5,
+                                                                         .subtype = true,
+                                                                         .entity = LASER_CANNON_BULLET,
+                                                                         .color = RED,
+                                                                         .is_valid = false}};
 
 /***********************************************************************************************************************
  *
@@ -110,6 +128,7 @@ void game_logic__private_spawn_octupus(int starting_row) {
     enemies_array[starting_row][i].entity = OCTOPUS;
     enemies_array[starting_row][i].color = PURPLE;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].subtype = true;
   }
 }
 
@@ -129,6 +148,7 @@ void game_logic__private_spawn_crab(int starting_row) {
     enemies_array[starting_row][i].entity = CRAB;
     enemies_array[starting_row][i].color = ELECTRIC_BLUE;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].subtype = true;
   }
 }
 
@@ -148,19 +168,20 @@ void game_logic__private_spawn_squid(int starting_row) {
     enemies_array[starting_row][i].entity = SQUID;
     enemies_array[starting_row][i].color = GREEN;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].subtype = true;
   }
 }
 
 static void game_logic__private_clear_enemy(game_object_s *enemy) {
   switch (enemy->entity) {
   case SQUID:
-    game_graphics__display_squid(enemy->row_position, enemy->column_position, BLACK);
+    game_graphics__display_squid(enemy->row_position, enemy->column_position, BLACK, !enemy->subtype);
     break;
   case CRAB:
-    game_graphics__display_crab(enemy->row_position, enemy->column_position, BLACK);
+    game_graphics__display_crab(enemy->row_position, enemy->column_position, BLACK, !enemy->subtype);
     break;
   case OCTOPUS:
-    game_graphics__display_octopus(enemy->row_position, enemy->column_position, BLACK);
+    game_graphics__display_octopus(enemy->row_position, enemy->column_position, BLACK, !enemy->subtype);
     break;
   default:
     break;
@@ -170,17 +191,18 @@ static void game_logic__private_clear_enemy(game_object_s *enemy) {
 static void game_logic__private_display_enemy(game_object_s *enemy) {
   switch (enemy->entity) {
   case SQUID:
-    game_graphics__display_squid(enemy->row_position, enemy->column_position, enemy->color);
+    game_graphics__display_squid(enemy->row_position, enemy->column_position, enemy->color, enemy->subtype);
     break;
   case CRAB:
-    game_graphics__display_crab(enemy->row_position, enemy->column_position, enemy->color);
+    game_graphics__display_crab(enemy->row_position, enemy->column_position, enemy->color, enemy->subtype);
     break;
   case OCTOPUS:
-    game_graphics__display_octopus(enemy->row_position, enemy->column_position, enemy->color);
+    game_graphics__display_octopus(enemy->row_position, enemy->column_position, enemy->color, enemy->subtype);
     break;
   default:
     break;
   }
+  enemy->subtype = !enemy->subtype;
 }
 
 static void game_logic__private_determine_enemy_movement(game_object_s *enemy) {
@@ -225,12 +247,13 @@ static void game_logic__private_determine_enemy_movement(game_object_s *enemy) {
 }
 
 void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy) {
-  // If
+  // TODO
 }
 
-void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {}
+void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(game_object_s *enemy) {
+  // TODO
+}
 
-// TODO: Add private function for having enemies randomly shooting
 // TODO: Add score counter logic
 
 bool game_logic__private_detect_enemy_bullet_is_valid(game_object_s *enemy) {

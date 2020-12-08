@@ -116,9 +116,6 @@ void start_screen_task(void *p) {
   }
 }
 
-// TODO: check if an interrupt has been received while the game is running and clear it so that it won't skip the splash
-// screen up reset
-
 void game_over_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_over_status()) {
@@ -128,8 +125,8 @@ void game_over_screen_task(void *p) {
       vTaskSuspend(enemy_shooting_task_handle);
       led_matrix__clear_display();
       game_graphics__display_game_over_screen();
+      is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
-        is_game_started = false;
         vTaskResume(start_screen_task_handle);
         led_matrix__clear_display();
         game_logic__set_game_over_status(false);
@@ -180,10 +177,12 @@ static void shooting_button_isr(void) {
 }
 
 static void start_button_isr(void) {
-  button_pressed_time = sys_time__get_uptime_ms();
-  if (button_pressed_time - button_last_time_pressed > 200) {
-    button_last_time_pressed = button_pressed_time;
-    xSemaphoreGiveFromISR(start_button_pressed, NULL);
+  if (!is_game_started) {
+    button_pressed_time = sys_time__get_uptime_ms();
+    if (button_pressed_time - button_last_time_pressed > 200) {
+      button_last_time_pressed = button_pressed_time;
+      xSemaphoreGiveFromISR(start_button_pressed, NULL);
+    }
   }
 }
 

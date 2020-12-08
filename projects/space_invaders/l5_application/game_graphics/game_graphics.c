@@ -358,6 +358,9 @@ void game_graphics__display_laser_cannon(uint8_t row, uint8_t column, led_color_
 }
 
 /*
+ *
+ *       ENTITY_SUBTYPE_1
+ *
  *        LARGE OCTOPUS
  *
  *            ****
@@ -369,52 +372,9 @@ void game_graphics__display_laser_cannon(uint8_t row, uint8_t column, led_color_
  *         **  **  **
  *          **    **
  *
- */
-
-void game_graphics__display_octopus(uint8_t row, uint8_t column, led_color_e color) {
-  for (uint8_t i = 4; i < 8; i++) {
-    led_matrix__set_pixel(row, column + i, color);
-  }
-  for (uint8_t i = 1; i < 11; i++) {
-    led_matrix__set_pixel(row + 1, column + i, color);
-  }
-  for (uint8_t i = 0; i < 12; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  for (uint8_t i = 0; i < 3; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 5; i < 7; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 9; i < 12; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 2; i < 5; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  for (uint8_t i = 7; i < 10; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  for (uint8_t i = 1; i < 3; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 5; i < 7; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 9; i < 11; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 2; i < 4; i++) {
-    led_matrix__set_pixel(row + 7, column + i, color);
-  }
-  for (uint8_t i = 8; i < 10; i++) {
-    led_matrix__set_pixel(row + 7, column + i, color);
-  }
-}
-
-/*
+ *
+ *       ENTITY_SUBTYPE_2
+ *
  *        LARGE OCTOPUS
  *           WALKING
  *
@@ -429,50 +389,96 @@ void game_graphics__display_octopus(uint8_t row, uint8_t column, led_color_e col
  *
  */
 
-void game_graphics__display_octopus_walking(uint8_t row, uint8_t column, led_color_e color) {
-  for (uint8_t i = 4; i < 8; i++) {
-    led_matrix__set_pixel(row, column + i, color);
-  }
-  for (uint8_t i = 1; i < 11; i++) {
-    led_matrix__set_pixel(row + 1, column + i, color);
-  }
-  for (uint8_t i = 0; i < 12; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  for (uint8_t i = 0; i < 3; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 5; i < 7; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 9; i < 12; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  for (uint8_t i = 7; i < 9; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  for (uint8_t i = 2; i < 4; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 5; i < 7; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 8; i < 10; i++) {
-    led_matrix__set_pixel(row + 6, column + i, color);
-  }
-  for (uint8_t i = 0; i < 2; i++) {
-    led_matrix__set_pixel(row + 7, column + i, color);
-  }
-  for (uint8_t i = 10; i < 12; i++) {
-    led_matrix__set_pixel(row + 7, column + i, color);
+void game_graphics__display_octopus(uint8_t row, uint8_t column, led_color_e color, entity_subtype_t subtype) {
+  if (subtype == ENTITY_SUBTYPE_1) {
+    for (uint8_t i = 4; i < 8; i++) {
+      led_matrix__set_pixel(row, column + i, color);
+    }
+    for (uint8_t i = 1; i < 11; i++) {
+      led_matrix__set_pixel(row + 1, column + i, color);
+    }
+    for (uint8_t i = 0; i < 12; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    for (uint8_t i = 0; i < 3; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 5; i < 7; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 9; i < 12; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 2; i < 5; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    for (uint8_t i = 7; i < 10; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    for (uint8_t i = 1; i < 3; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 5; i < 7; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 9; i < 11; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 2; i < 4; i++) {
+      led_matrix__set_pixel(row + 7, column + i, color);
+    }
+    for (uint8_t i = 8; i < 10; i++) {
+      led_matrix__set_pixel(row + 7, column + i, color);
+    }
+  } else {
+    for (uint8_t i = 4; i < 8; i++) {
+      led_matrix__set_pixel(row, column + i, color);
+    }
+    for (uint8_t i = 1; i < 11; i++) {
+      led_matrix__set_pixel(row + 1, column + i, color);
+    }
+    for (uint8_t i = 0; i < 12; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    for (uint8_t i = 0; i < 3; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 5; i < 7; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 9; i < 12; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    for (uint8_t i = 7; i < 9; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    for (uint8_t i = 2; i < 4; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 5; i < 7; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 8; i < 10; i++) {
+      led_matrix__set_pixel(row + 6, column + i, color);
+    }
+    for (uint8_t i = 0; i < 2; i++) {
+      led_matrix__set_pixel(row + 7, column + i, color);
+    }
+    for (uint8_t i = 10; i < 12; i++) {
+      led_matrix__set_pixel(row + 7, column + i, color);
+    }
   }
 }
 
 /*
+ *
+ *     ENTITY_SUBTYPE_1
+ *
  *       MEDIUM CRAB
  *
  *         *     *
@@ -484,44 +490,9 @@ void game_graphics__display_octopus_walking(uint8_t row, uint8_t column, led_col
  *       * *     * *
  *          ** **
  *
- */
-
-void game_graphics__display_crab(uint8_t row, uint8_t column, led_color_e color) {
-  led_matrix__set_pixel(row, column + 2, color);
-  led_matrix__set_pixel(row, column + 8, color);
-  led_matrix__set_pixel(row + 1, column + 3, color);
-  led_matrix__set_pixel(row + 1, column + 7, color);
-  for (uint8_t i = 2; i < 9; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
-  }
-  for (uint8_t i = 1; i < 3; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 4; i < 7; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 8; i < 10; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 0; i < 11; i++) {
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  led_matrix__set_pixel(row + 5, column, color);
-  for (uint8_t i = 2; i < 9; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  led_matrix__set_pixel(row + 5, column + 10, color);
-  led_matrix__set_pixel(row + 6, column, color);
-  led_matrix__set_pixel(row + 6, column + 2, color);
-  led_matrix__set_pixel(row + 6, column + 8, color);
-  led_matrix__set_pixel(row + 6, column + 10, color);
-  led_matrix__set_pixel(row + 7, column + 3, color);
-  led_matrix__set_pixel(row + 7, column + 4, color);
-  led_matrix__set_pixel(row + 7, column + 6, color);
-  led_matrix__set_pixel(row + 7, column + 7, color);
-}
-
-/*
+ *
+ *     ENTITY_SUBTYPE_2
+ *
  *       MEDIUM CRAB
  *         WALKING
  *
@@ -536,40 +507,78 @@ void game_graphics__display_crab(uint8_t row, uint8_t column, led_color_e color)
  *
  */
 
-void game_graphics__display_crab_walking(uint8_t row, uint8_t column, led_color_e color) {
-  led_matrix__set_pixel(row, column + 2, color);
-  led_matrix__set_pixel(row, column + 8, color);
-  led_matrix__set_pixel(row + 1, column, color);
-  led_matrix__set_pixel(row + 1, column + 3, color);
-  led_matrix__set_pixel(row + 1, column + 7, color);
-  led_matrix__set_pixel(row + 1, column + 10, color);
-  led_matrix__set_pixel(row + 2, column, color);
-  for (uint8_t i = 2; i < 9; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
+void game_graphics__display_crab(uint8_t row, uint8_t column, led_color_e color, entity_subtype_t subtype) {
+  if (subtype == ENTITY_SUBTYPE_1) {
+    led_matrix__set_pixel(row, column + 2, color);
+    led_matrix__set_pixel(row, column + 8, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 7, color);
+    for (uint8_t i = 2; i < 9; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+    }
+    for (uint8_t i = 1; i < 3; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 4; i < 7; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 8; i < 10; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 0; i < 11; i++) {
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    led_matrix__set_pixel(row + 5, column, color);
+    for (uint8_t i = 2; i < 9; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    led_matrix__set_pixel(row + 5, column + 10, color);
+    led_matrix__set_pixel(row + 6, column, color);
+    led_matrix__set_pixel(row + 6, column + 2, color);
+    led_matrix__set_pixel(row + 6, column + 8, color);
+    led_matrix__set_pixel(row + 6, column + 10, color);
+    led_matrix__set_pixel(row + 7, column + 3, color);
+    led_matrix__set_pixel(row + 7, column + 4, color);
+    led_matrix__set_pixel(row + 7, column + 6, color);
+    led_matrix__set_pixel(row + 7, column + 7, color);
+  } else {
+    led_matrix__set_pixel(row, column + 2, color);
+    led_matrix__set_pixel(row, column + 8, color);
+    led_matrix__set_pixel(row + 1, column, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 1, column + 7, color);
+    led_matrix__set_pixel(row + 1, column + 10, color);
+    led_matrix__set_pixel(row + 2, column, color);
+    for (uint8_t i = 2; i < 9; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+    }
+    led_matrix__set_pixel(row + 2, column + 10, color);
+    for (uint8_t i = 0; i < 3; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 4; i < 7; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 8; i < 11; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 0; i < 11; i++) {
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    for (uint8_t i = 1; i < 10; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    led_matrix__set_pixel(row + 6, column + 2, color);
+    led_matrix__set_pixel(row + 6, column + 8, color);
+    led_matrix__set_pixel(row + 7, column + 1, color);
+    led_matrix__set_pixel(row + 7, column + 9, color);
   }
-  led_matrix__set_pixel(row + 2, column + 10, color);
-  for (uint8_t i = 0; i < 3; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 4; i < 7; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 8; i < 11; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 0; i < 11; i++) {
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  for (uint8_t i = 1; i < 10; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  led_matrix__set_pixel(row + 6, column + 2, color);
-  led_matrix__set_pixel(row + 6, column + 8, color);
-  led_matrix__set_pixel(row + 7, column + 1, color);
-  led_matrix__set_pixel(row + 7, column + 9, color);
 }
 
 /*
+ *
+ *    ENTITY_SUBTYPE_2
+ *
  *      SMALL SQUID
  *
  *          **
@@ -581,42 +590,9 @@ void game_graphics__display_crab_walking(uint8_t row, uint8_t column, led_color_
  *       *      *
  *        *    *
  *
- */
-
-void game_graphics__display_squid(uint8_t row, uint8_t column, led_color_e color) {
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row, column + i, color);
-  }
-  for (uint8_t i = 2; i < 6; i++) {
-    led_matrix__set_pixel(row + 1, column + i, color);
-  }
-  for (uint8_t i = 1; i < 7; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
-  }
-  for (uint8_t i = 0; i < 2; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 6; i < 8; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 0; i < 8; i++) {
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  led_matrix__set_pixel(row + 5, column + 1, color);
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row + 5, column + i, color);
-  }
-  led_matrix__set_pixel(row + 5, column + 6, color);
-  led_matrix__set_pixel(row + 6, column, color);
-  led_matrix__set_pixel(row + 6, column + 7, color);
-  led_matrix__set_pixel(row + 7, column + 1, color);
-  led_matrix__set_pixel(row + 7, column + 6, color);
-}
-
-/*
+ *
+ *    ENTITY_SUBTYPE_2
+ *
  *      SMALL SQUID
  *        WALKING
  *
@@ -631,38 +607,71 @@ void game_graphics__display_squid(uint8_t row, uint8_t column, led_color_e color
  *
  */
 
-void game_graphics__display_squid_walking(uint8_t row, uint8_t column, led_color_e color) {
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row, column + i, color);
+void game_graphics__display_squid(uint8_t row, uint8_t column, led_color_e color, entity_subtype_t subtype) {
+  if (subtype == ENTITY_SUBTYPE_1) {
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row, column + i, color);
+    }
+    for (uint8_t i = 2; i < 6; i++) {
+      led_matrix__set_pixel(row + 1, column + i, color);
+    }
+    for (uint8_t i = 1; i < 7; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+    }
+    for (uint8_t i = 0; i < 2; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 6; i < 8; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 0; i < 8; i++) {
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    led_matrix__set_pixel(row + 5, column + 1, color);
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row + 5, column + i, color);
+    }
+    led_matrix__set_pixel(row + 5, column + 6, color);
+    led_matrix__set_pixel(row + 6, column, color);
+    led_matrix__set_pixel(row + 6, column + 7, color);
+    led_matrix__set_pixel(row + 7, column + 1, color);
+    led_matrix__set_pixel(row + 7, column + 6, color);
+  } else {
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row, column + i, color);
+    }
+    for (uint8_t i = 2; i < 6; i++) {
+      led_matrix__set_pixel(row + 1, column + i, color);
+    }
+    for (uint8_t i = 1; i < 7; i++) {
+      led_matrix__set_pixel(row + 2, column + i, color);
+    }
+    for (uint8_t i = 0; i < 2; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 3; i < 5; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 6; i < 8; i++) {
+      led_matrix__set_pixel(row + 3, column + i, color);
+    }
+    for (uint8_t i = 0; i < 8; i++) {
+      led_matrix__set_pixel(row + 4, column + i, color);
+    }
+    led_matrix__set_pixel(row + 5, column + 2, color);
+    led_matrix__set_pixel(row + 5, column + 5, color);
+    led_matrix__set_pixel(row + 6, column + 1, color);
+    led_matrix__set_pixel(row + 6, column + 3, color);
+    led_matrix__set_pixel(row + 6, column + 4, color);
+    led_matrix__set_pixel(row + 6, column + 6, color);
+    led_matrix__set_pixel(row + 7, column, color);
+    led_matrix__set_pixel(row + 7, column + 2, color);
+    led_matrix__set_pixel(row + 7, column + 5, color);
+    led_matrix__set_pixel(row + 7, column + 7, color);
   }
-  for (uint8_t i = 2; i < 6; i++) {
-    led_matrix__set_pixel(row + 1, column + i, color);
-  }
-  for (uint8_t i = 1; i < 7; i++) {
-    led_matrix__set_pixel(row + 2, column + i, color);
-  }
-  for (uint8_t i = 0; i < 2; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 3; i < 5; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 6; i < 8; i++) {
-    led_matrix__set_pixel(row + 3, column + i, color);
-  }
-  for (uint8_t i = 0; i < 8; i++) {
-    led_matrix__set_pixel(row + 4, column + i, color);
-  }
-  led_matrix__set_pixel(row + 5, column + 2, color);
-  led_matrix__set_pixel(row + 5, column + 5, color);
-  led_matrix__set_pixel(row + 6, column + 1, color);
-  led_matrix__set_pixel(row + 6, column + 3, color);
-  led_matrix__set_pixel(row + 6, column + 4, color);
-  led_matrix__set_pixel(row + 6, column + 6, color);
-  led_matrix__set_pixel(row + 7, column, color);
-  led_matrix__set_pixel(row + 7, column + 2, color);
-  led_matrix__set_pixel(row + 7, column + 5, color);
-  led_matrix__set_pixel(row + 7, column + 7, color);
 }
 
 /*
@@ -766,7 +775,7 @@ void game_graphics__display_laser_cannon_bullet(uint8_t row, uint8_t column, led
  *
  */
 
-void game_graphics__display_explotion(uint8_t row, uint8_t column, led_color_e color) {
+void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e color) {
   led_matrix__set_pixel(row, column + 5, color);
   led_matrix__set_pixel(row + 1, column + 1, color);
   led_matrix__set_pixel(row + 1, column + 5, color);
