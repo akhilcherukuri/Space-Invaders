@@ -44,7 +44,9 @@
  *
  **********************************************************************************************************************/
 
-static bool is_game_over = false;
+static int number_of_enemies_left;
+static bool is_game_over;
+static int outer_most_enemy_index = 0;
 
 static gpio_s joystick_left, joystick_right, start_button, shooting_button;
 
@@ -62,7 +64,6 @@ static const int squid_column_boundary = 8;
 static const int game_over_row_boundary = laser_cannon_start_row_position - laser_cannon_row_boundary;
 
 static const TickType_t enemies_speed_delay_ms = 40;
-static int number_of_enemies_left;
 
 static const uint8_t led_matrix_left_boundary = 0;
 static const uint8_t led_matrix_right_boundary = 64;
@@ -205,45 +206,115 @@ static void game_logic__private_display_enemy(game_object_s *enemy) {
   enemy->subtype = !enemy->subtype;
 }
 
-static void game_logic__private_determine_enemy_movement(game_object_s *enemy) {
-  if (enemy[0].moving_direction == LEFT) {
-    if (enemy[0].column_position - enemy_column_delta > led_matrix_left_boundary) {
-      for (size_t i = 0; i < MAX_NUM_OF_ENEMIES; i++) {
-        game_logic__private_clear_enemy(&enemy[i]);
-        enemy[i].column_position -= enemy_column_delta;
-      }
-    } else {
-      for (size_t i = 0; i < MAX_NUM_OF_ENEMIES; i++) {
-        game_logic__private_clear_enemy(&enemy[i]);
-        if (enemy[i].row_position != game_over_row_boundary) {
-          enemy[i].row_position += enemy_row_delta;
-          enemy[i].moving_direction = RIGHT;
-        } else {
-          is_game_over = true;
-        }
+static int game_logic__private_determine_outer_most_valid_enemy(game_object_s *row) {
+  int index = 0;
+  if (row[0].moving_direction == LEFT) {
+    for (size_t i = 0; i < MAX_NUM_OF_ENEMIES; i++) {
+      if (row[i].is_valid) {
+        index = i;
+        break;
       }
     }
-  } else if (enemy[MAX_NUM_OF_ENEMIES - 1].moving_direction == RIGHT) {
-    if (enemy[MAX_NUM_OF_ENEMIES - 1].column_position + enemy_column_delta + enemy[MAX_NUM_OF_ENEMIES - 1].width <
-        led_matrix_right_boundary) {
-      for (size_t i = 0; i < MAX_NUM_OF_ENEMIES; i++) {
-        game_logic__private_clear_enemy(&enemy[i]);
-        enemy[i].column_position += enemy_column_delta;
+  } else {
+    for (size_t i = MAX_NUM_OF_ENEMIES; i > 0; i--) {
+      if (row[i - 1].is_valid) {
+        index = i - 1;
+        break;
+      }
+    }
+  }
+  return index;
+}
+
+static bool game_logic__private_horizontal_collision_imminent(void) {
+  bool enemy_will_hit_wall = false;
+  // int outer_most_enemy_index = 0;
+
+  for (size_t row = 0; row < MAX_ROW_OF_ENEMIES && !enemy_will_hit_wall; row++) {
+    outer_most_enemy_index = game_logic__private_determine_outer_most_valid_enemy(&enemies_array[row]);
+    if (enemies_array[row][outer_most_enemy_index].moving_direction == LEFT) {
+      if (enemies_array[row][outer_most_enemy_index].column_position - enemy_column_delta > led_matrix_left_boundary) {
+        // No collision. Do nothing
+      } else {
+        enemy_will_hit_wall = true;
+        break;
+      }
+    } else if (enemies_array[row][outer_most_enemy_index].moving_direction == RIGHT) {
+      if (enemies_array[row][outer_most_enemy_index].column_position + enemy_column_delta +
+              enemies_array[row][outer_most_enemy_index].width <
+          led_matrix_right_boundary) {
+        // No collision. Do nothing
+      } else {
+        enemy_will_hit_wall = true;
+        break;
       }
     } else {
-      for (size_t i = 0; i < MAX_NUM_OF_ENEMIES; i++) {
-        game_logic__private_clear_enemy(&enemy[i]);
-        if (enemy[i].row_position != game_over_row_boundary) {
-          enemy[i].row_position += enemy_row_delta;
-          enemy[i].moving_direction = LEFT;
-        } else {
-          is_game_over = true;
+      // Do nothing
+    }
+  }
+  return enemy_will_hit_wall;
+}
+
+static void game_logic__private_game_over(void) {
+  number_of_enemies_left = 12;
+  is_game_over = true;
+  vTaskSuspend(NULL);
+}
+
+static bool game_logic__private_determine_enemy_movement(void) {
+  bool enemy_will_hit_wall = game_logic__private_horizontal_collision_imminent();
+
+  if (enemy_will_hit_wall) {
+    // puts("Imminent collision"); // TODO Remove after testing
+    for (size_t row = 0; row < MAX_ROW_OF_ENEMIES; row++) {
+      if (enemies_array[row][0].moving_direction == LEFT) {
+        for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
+          // printf("Direction left: Enemy in row %d col %d Valid: %s Collision Index: %d Row Pos: %d Col Pos: %d\n",
+          // row,
+          //        col, enemies_array[row][col].is_valid ? "true" : "false", outer_most_enemy_index,
+          //        enemies_array[row][col].row_position, enemies_array[row][col].column_position); // TODO Remove after
+          //        testing
+          game_logic__private_clear_enemy(&enemies_array[row][col]);
+          enemies_array[row][col].moving_direction = RIGHT;
+          enemies_array[row][col].row_position += enemy_row_delta;
+          if (((enemies_array[row][col].row_position + enemies_array[row][col].height) >= game_over_row_boundary) &&
+              enemies_array[row][col].is_valid) {
+            return false;
+          }
+        }
+      } else if (enemies_array[row][0].moving_direction == RIGHT) {
+        for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
+          // printf("Direction right: Enemy in row %d col %d Valid: %s Collision Index: %d Row Pos: %d Col Pos: %d\n",
+          // row,
+          //        col, enemies_array[row][col].is_valid ? "true" : "false", outer_most_enemy_index,
+          //        enemies_array[row][col].row_position, enemies_array[row][col].column_position); // TODO Remove after
+          //        testing
+          game_logic__private_clear_enemy(&enemies_array[row][col]);
+          enemies_array[row][col].row_position += enemy_row_delta;
+          enemies_array[row][col].moving_direction = LEFT;
+          if (((enemies_array[row][col].row_position + enemies_array[row][col].height) >= game_over_row_boundary) &&
+              enemies_array[row][col].is_valid) {
+            return false;
+          }
         }
       }
     }
   } else {
-    // Do nothing
+    for (size_t row = 0; row < MAX_ROW_OF_ENEMIES; row++) {
+      if (enemies_array[row][0].moving_direction == LEFT) {
+        for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
+          game_logic__private_clear_enemy(&enemies_array[row][col]);
+          enemies_array[row][col].column_position -= enemy_column_delta;
+        }
+      } else if (enemies_array[row][0].moving_direction == RIGHT) {
+        for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
+          game_logic__private_clear_enemy(&enemies_array[row][col]);
+          enemies_array[row][col].column_position += enemy_column_delta;
+        }
+      }
+    }
   }
+  return true;
 }
 
 void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy) {
@@ -253,21 +324,21 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 1) {
-      for (size_t j = MAX_ROW_OF_ENEMIES; j >= 0; j--) {
+      for (size_t j = MAX_ROW_OF_ENEMIES; j > 0; j--) {
         for (size_t k = 0; k < MAX_NUM_OF_ENEMIES; k++) {
-          if (enemies_array[j][k].is_valid) {
-            if ((enemies_array[j][k].column_position <= cannon_bullets_array[i].column_position) &&
+          if (enemies_array[j - 1][k].is_valid) {
+            if ((enemies_array[j - 1][k].column_position <= cannon_bullets_array[i].column_position) &&
                 (cannon_bullets_array[i].column_position <=
-                 (enemies_array[j][k].column_position + enemies_array[j][k].width))) {
+                 (enemies_array[j - 1][k].column_position + enemies_array[j - 1][k].width))) {
               cannon_bullets_array[i].is_valid = false;
               game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
                                                          cannon_bullets_array[i].column_position, BLACK);
-              enemies_array[j][k].is_valid = false;
-              game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
-                                               RED);
+              enemies_array[j - 1][k].is_valid = false;
+              game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
+                                               enemies_array[j - 1][k].column_position, RED);
               vTaskDelay(15);
-              game_graphics__display_explosion(enemies_array[j][k].row_position, enemies_array[j][k].column_position,
-                                               BLACK);
+              game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
+                                               enemies_array[j - 1][k].column_position, BLACK);
               number_of_enemies_left--;
               return;
             }
@@ -389,16 +460,17 @@ void game_logic__move_laser_cannon(void) {
 }
 
 void game_logic__move_enemies(void) {
-  if (!is_game_over) {
+  if (game_logic__private_determine_enemy_movement()) {
     for (size_t i = 0; i < MAX_ROW_OF_ENEMIES; i++) {
-      game_logic__private_determine_enemy_movement(&enemies_array[i]);
       for (size_t j = 0; j < MAX_NUM_OF_ENEMIES; j++) {
-        if (enemies_array[i][j].is_valid == true) {
+        if (enemies_array[i][j].is_valid) {
           game_logic__private_display_enemy(&enemies_array[i][j]);
         }
       }
     }
     vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
+  } else {
+    game_logic__private_game_over();
   }
 }
 
@@ -442,7 +514,7 @@ void game_logic__check_valid_enemy_to_shoot_bullet(void) {
   const TickType_t bullet_speed = 50;
   uint8_t enemy_row = (rand() % MAX_ROW_OF_ENEMIES);
   uint8_t enemy_column = (rand() % MAX_NUM_OF_ENEMIES);
-  if (enemies_array[enemy_row][enemy_column].is_valid == true) {
+  if (enemies_array[enemy_row][enemy_column].is_valid) {
     if (game_logic__private_detect_enemy_bullet_is_valid(&enemies_array[enemy_row][enemy_column], enemy_row)) {
       game_logic__private_enemy_shoot_bullet(&enemies_array[enemy_row][enemy_column]);
     }
