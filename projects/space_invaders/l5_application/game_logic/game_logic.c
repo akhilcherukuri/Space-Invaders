@@ -51,8 +51,8 @@ static bool is_game_over;
 static int number_of_enemies_left;
 static int outer_most_enemy_index = 0;
 
-static const int score_board_number_column_offset = 29;
-static const int score_board_number_row_offset = 3; // 3-11 rows are used
+static const int score_board_number_column_offset = 31;
+static const int score_board_number_row_offset = 5; // 3-11 rows are used
 static int overall_game_score = 0;
 
 static gpio_s joystick_left, joystick_right, start_button, shooting_button;
