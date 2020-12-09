@@ -9,6 +9,7 @@
 /* Standard Includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* External Includes */
 #include "game_graphics.h"
@@ -50,6 +51,10 @@ static bool is_game_over;
 static int number_of_enemies_left;
 static int outer_most_enemy_index = 0;
 
+static const int score_board_number_column_offset = 29;
+static const int score_board_number_row_offset = 3; // 3-11 rows are used
+static int overall_game_score = 0;
+
 static gpio_s joystick_left, joystick_right, start_button, shooting_button;
 
 static const int laser_cannon_start_column_position = 26;
@@ -85,29 +90,36 @@ static game_object_s laser_cannon = {
     .entity = LASER_CANNON,
     .color = ELECTRIC_BLUE,
     .is_valid = true,
+    .points = 0,
 };
 
 static game_object_s enemies_array[MAX_ROW_OF_ENEMIES][MAX_NUM_OF_ENEMIES];
 
-static game_object_s enemy_bullets_array[MAX_NUM_OF_ENEMY_BULLETS] = {{.column_position = 53,
-                                                                       .row_position = 26,
-                                                                       .moving_direction = DOWN,
-                                                                       .width = 1,
-                                                                       .height = 5,
-                                                                       .subtype = true,
-                                                                       .entity = ENEMY_BULLET,
-                                                                       .color = YELLOW,
-                                                                       .is_valid = false}};
+static game_object_s enemy_bullets_array[MAX_NUM_OF_ENEMY_BULLETS] = {{
+    .column_position = 53,
+    .row_position = 26,
+    .moving_direction = DOWN,
+    .width = 1,
+    .height = 5,
+    .subtype = true,
+    .entity = ENEMY_BULLET,
+    .color = YELLOW,
+    .is_valid = false,
+    .points = 0,
+}};
 
-static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS] = {{.column_position = 53,
-                                                                         .row_position = 26,
-                                                                         .moving_direction = UP,
-                                                                         .width = 1,
-                                                                         .height = 5,
-                                                                         .subtype = true,
-                                                                         .entity = LASER_CANNON_BULLET,
-                                                                         .color = RED,
-                                                                         .is_valid = false}};
+static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS] = {{
+    .column_position = 53,
+    .row_position = 26,
+    .moving_direction = UP,
+    .width = 1,
+    .height = 5,
+    .subtype = true,
+    .entity = LASER_CANNON_BULLET,
+    .color = RED,
+    .is_valid = false,
+    .points = 0,
+}};
 
 /***********************************************************************************************************************
  *
@@ -132,6 +144,7 @@ void game_logic__private_spawn_octupus(int starting_row) {
     enemies_array[starting_row][i].entity = OCTOPUS;
     enemies_array[starting_row][i].color = PURPLE;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].points = 10;
   }
 }
 
@@ -152,6 +165,7 @@ void game_logic__private_spawn_crab(int starting_row) {
     enemies_array[starting_row][i].entity = CRAB;
     enemies_array[starting_row][i].color = ELECTRIC_BLUE;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].points = 20;
   }
 }
 
@@ -172,6 +186,7 @@ void game_logic__private_spawn_squid(int starting_row) {
     enemies_array[starting_row][i].entity = SQUID;
     enemies_array[starting_row][i].color = GREEN;
     enemies_array[starting_row][i].is_valid = true;
+    enemies_array[starting_row][i].points = 30;
   }
 }
 
@@ -318,7 +333,7 @@ static bool game_logic__private_determine_enemy_movement(void) {
 }
 
 bool game_logic__decrease_laser_cannon_lives(void) {
-  static uint8_t available_lives = 3;
+  uint8_t available_lives = 3;
   bool is_still_alive = false;
   available_lives--;
   is_still_alive = (available_lives > 0) ? true : false;
@@ -342,6 +357,13 @@ void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy
   }
 }
 
+void game_logic__private_update_scoreboard(led_color_e color, int score) {
+  char score_in_array[5];
+  // itoa(score, score_in_array, 10); // TODO: Fix this
+  game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, color,
+                                     score_in_array);
+}
+
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 1) {
@@ -355,8 +377,10 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
                                                          cannon_bullets_array[i].column_position, BLACK);
               enemies_array[j - 1][k].is_valid = false;
+              overall_game_score += enemies_array[j - 1][k].points;
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
+              game_logic__private_update_scoreboard(RED, overall_game_score);
               vTaskDelay(15);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
@@ -369,8 +393,6 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
     }
   }
 }
-
-// TODO: Add score counter logic
 
 bool game_logic__private_detect_enemy_bullet_is_valid(game_object_s *enemy, uint8_t row) {
   bool valid = false;

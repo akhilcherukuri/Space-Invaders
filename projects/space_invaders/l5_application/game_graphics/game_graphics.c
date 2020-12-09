@@ -818,3 +818,14 @@ void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e c
   led_matrix__set_pixel(row + 8, column + 10, color);
   led_matrix__set_pixel(row + 9, column + 6, color);
 }
+
+void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, char *score) {
+  char previous_score[5] = {'0', '0', '0', '0', '0'};
+
+  for (int i = 0; i < 5; i++) {
+    led_matrix_basic_graphics__display_number(row, column, previous_score[i], BLACK);
+    led_matrix_basic_graphics__display_number(row, column, score[i], color);
+    column += 5;
+  }
+  memcpy(previous_score, score, sizeof(previous_score));
+}

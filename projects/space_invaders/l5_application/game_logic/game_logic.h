@@ -40,6 +40,7 @@ typedef struct {
   entity_subtype_t subtype;
   led_color_e color;
   bool is_valid;
+  int points;
 } game_object_s;
 
 /***********************************************************************************************************************
