@@ -50,6 +50,8 @@ typedef struct {
 void game_logic__initialize(void);
 void game_logic__move_laser_cannon(void);
 void game_logic__move_enemies(void);
+bool game_logic__get_game_won_status(void);
+void game_logic__set_game_won_status(bool status);
 bool game_logic__get_game_over_status(void);
 void game_logic__set_game_over_status(bool status);
 void game_logic__shoot_bullet(void);

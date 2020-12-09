@@ -24,7 +24,9 @@ static void configure_gpio_interrupts(void);
 static SemaphoreHandle_t shooting_button_pressed;
 static SemaphoreHandle_t start_button_pressed;
 
+static TaskHandle_t display_scoreboard_task_handle;
 static TaskHandle_t start_screen_task_handle;
+static TaskHandle_t victory_screen_task_handle;
 static TaskHandle_t game_over_screen_task_handle;
 static TaskHandle_t move_laser_cannon_task_handle;
 static TaskHandle_t move_enemies_task_handle;
@@ -38,12 +40,14 @@ bool is_game_started = false;
 
 void refresh_display_task(void *p);
 void led_decorative_sign_task(void *p);
+void display_scoreboard_task(void *p);
 void start_screen_task(void *p);
+void victory_screen_task(void *p);
 void game_over_screen_task(void *p);
 void move_laser_cannon_task(void *p);
 void move_enemies_task(void *p);
-void enemy_shooting_task(void *p);
 void laser_cannon_shooting_task(void *p);
+void enemy_shooting_task(void *p);
 
 int main(void) {
 
@@ -56,7 +60,11 @@ int main(void) {
 
   xTaskCreate(refresh_display_task, "refresh display", 2048 / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
   xTaskCreate(led_decorative_sign_task, "led decorative sign", 2048 / sizeof(void *), NULL, PRIORITY_LOW, NULL);
+  xTaskCreate(display_scoreboard_task, "display scoreboard", 2048 / sizeof(void *), NULL, PRIORITY_LOW,
+              &display_scoreboard_task_handle);
   xTaskCreate(start_screen_task, "start screen", 2048 / sizeof(void *), NULL, PRIORITY_LOW, &start_screen_task_handle);
+  xTaskCreate(victory_screen_task, "victory screen", 2048 / sizeof(void *), NULL, PRIORITY_LOW,
+              &victory_screen_task_handle);
   xTaskCreate(game_over_screen_task, "game over screen", 2048 / sizeof(void *), NULL, PRIORITY_LOW,
               &game_over_screen_task_handle);
   xTaskCreate(move_laser_cannon_task, "move laser cannon", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
@@ -93,10 +101,20 @@ void led_decorative_sign_task(void *p) {
   }
 }
 
+void display_scoreboard_task(void *p) {
+  uint8_t start_row = 5;
+  uint8_t start_column = 1;
+  while (1) {
+    led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
+    vTaskDelay(3);
+  }
+}
+
 void start_screen_task(void *p) {
   while (1) {
     if (is_game_started == false) {
       game_graphics__display_splash_screen();
+      vTaskSuspend(display_scoreboard_task_handle);
       vTaskSuspend(move_laser_cannon_task_handle);
       vTaskSuspend(laser_cannon_shooting_task_handle);
       vTaskSuspend(move_enemies_task_handle);
@@ -105,6 +123,7 @@ void start_screen_task(void *p) {
         is_game_started = true;
         led_matrix__clear_display();
         game_logic__respawn_enemies();
+        vTaskResume(display_scoreboard_task_handle);
         vTaskResume(move_laser_cannon_task_handle);
         vTaskResume(laser_cannon_shooting_task_handle);
         vTaskResume(move_enemies_task_handle);
@@ -116,9 +135,31 @@ void start_screen_task(void *p) {
   }
 }
 
+void victory_screen_task(void *p) {
+  while (1) {
+    if (game_logic__get_game_won_status()) {
+      vTaskSuspend(display_scoreboard_task_handle);
+      vTaskSuspend(move_laser_cannon_task_handle);
+      vTaskSuspend(laser_cannon_shooting_task_handle);
+      vTaskSuspend(move_enemies_task_handle);
+      vTaskSuspend(enemy_shooting_task_handle);
+      led_matrix__clear_display();
+      game_graphics__display_victory_screen();
+      is_game_started = false;
+      if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
+        vTaskResume(start_screen_task_handle);
+        led_matrix__clear_display();
+        game_logic__set_game_won_status(false);
+      }
+    }
+    vTaskDelay(3);
+  }
+}
+
 void game_over_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_over_status()) {
+      vTaskSuspend(display_scoreboard_task_handle);
       vTaskSuspend(move_laser_cannon_task_handle);
       vTaskSuspend(laser_cannon_shooting_task_handle);
       vTaskSuspend(move_enemies_task_handle);

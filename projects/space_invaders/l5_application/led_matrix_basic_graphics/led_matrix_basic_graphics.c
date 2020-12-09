@@ -306,7 +306,11 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'i':
   case 'I':
-    /* code */
+    led_matrix__set_pixel(row + 0, column, color);
+    led_matrix__set_pixel(row + 1, column, color);
+    led_matrix__set_pixel(row + 2, column, color);
+    led_matrix__set_pixel(row + 3, column, color);
+    led_matrix__set_pixel(row + 4, column, color);
     break;
   case 'j':
   case 'J':
@@ -461,7 +465,19 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'w':
   case 'W':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 0, color);
+    led_matrix__set_pixel(row + 2, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 0, color);
+    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 3, column + 1, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
+    led_matrix__set_pixel(row + 0, column + 4, color);
+    led_matrix__set_pixel(row + 1, column + 4, color);
+    led_matrix__set_pixel(row + 2, column + 4, color);
+    led_matrix__set_pixel(row + 3, column + 4, color);
+    led_matrix__set_pixel(row + 4, column + 4, color);
     break;
   case 'x':
   case 'X':
@@ -469,7 +485,13 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
     break;
   case 'y':
   case 'Y':
-    /* code */
+    led_matrix__set_pixel(row + 0, column + 0, color);
+    led_matrix__set_pixel(row + 0, column + 4, color);
+    led_matrix__set_pixel(row + 1, column + 1, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 3, column + 2, color);
+    led_matrix__set_pixel(row + 4, column + 2, color);
     break;
   case 'z':
   case 'Z':
@@ -480,64 +502,96 @@ void led_matrix_basic_graphics__display_letter(uint8_t row, uint8_t column, char
   }
 }
 
-void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column) {
-  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column, led_color_e color) {
+  led_matrix_basic_graphics__display_letter(row, column, 'S', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'C', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'C', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'O', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'O', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'R', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'E', color);
+  // SCORE : <score> below displays the colon
+  column += 6;
+  led_matrix__set_pixel(row + 0, column, color);
+  led_matrix__set_pixel(row + 1, column, color);
+  led_matrix__set_pixel(row + 3, column, color);
+  led_matrix__set_pixel(row + 4, column, color);
+  column += 1;
+  led_matrix__set_pixel(row + 0, column, color);
+  led_matrix__set_pixel(row + 1, column, color);
+  led_matrix__set_pixel(row + 3, column, color);
+  led_matrix__set_pixel(row + 4, column, color);
 }
 
-void led_matrix_basic_graphics__display_word_press_red_button(uint8_t row, uint8_t column) {
-  led_matrix_basic_graphics__display_letter(row, column, 'P', RED);
+void led_matrix_basic_graphics__display_word_press_red_button(uint8_t row, uint8_t column, led_color_e color) {
+  led_matrix_basic_graphics__display_letter(row, column, 'P', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'R', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'E', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'S', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'S', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'S', color);
   column += 8;
-  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'R', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'E', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'D', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'D', color);
   row += 7;
   column = 0;
   column += 16;
-  led_matrix_basic_graphics__display_letter(row, column, 'B', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'B', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'U', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'U', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'T', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'T', color);
   column += 6;
-  led_matrix_basic_graphics__display_letter(row, column, 'T', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'T', color);
   column += 6;
-  led_matrix_basic_graphics__display_letter(row, column, 'O', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'O', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'N', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'N', color);
 }
 
-void led_matrix_basic_graphics__display_word_game_over(uint8_t row, uint8_t column) {
-  led_matrix_basic_graphics__display_letter(row, column, 'G', RED);
+void led_matrix_basic_graphics__display_word_game_over(uint8_t row, uint8_t column, led_color_e color) {
+  led_matrix_basic_graphics__display_letter(row, column, 'G', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'A', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'A', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'M', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'M', color);
   column += 6;
-  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'E', color);
   column += 8;
-  led_matrix_basic_graphics__display_letter(row, column, 'O', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'O', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'V', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'V', color);
   column += 6;
-  led_matrix_basic_graphics__display_letter(row, column, 'E', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'E', color);
   column += 5;
-  led_matrix_basic_graphics__display_letter(row, column, 'R', RED);
+  led_matrix_basic_graphics__display_letter(row, column, 'R', color);
+}
+
+void led_matrix_basic_graphics__display_word_you_win(uint8_t row, uint8_t column, led_color_e color) {
+  led_matrix_basic_graphics__display_letter(row, column, 'Y', color);
+  column += 6;
+  led_matrix_basic_graphics__display_letter(row, column, 'O', color);
+  column += 5;
+  led_matrix_basic_graphics__display_letter(row, column, 'U', color);
+  column += 8;
+  led_matrix_basic_graphics__display_letter(row, column, 'W', color);
+  column += 6;
+  led_matrix_basic_graphics__display_letter(row, column, 'I', color);
+  column += 2;
+  led_matrix_basic_graphics__display_letter(row, column, 'N', color);
+
+  // Display exclamation point
+  column += 8;
+  led_matrix__set_pixel(row + 0, column, color);
+  led_matrix__set_pixel(row + 1, column, color);
+  led_matrix__set_pixel(row + 2, column, color);
+  led_matrix__set_pixel(row + 4, column, color);
 }

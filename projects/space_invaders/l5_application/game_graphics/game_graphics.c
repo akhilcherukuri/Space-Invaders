@@ -308,13 +308,30 @@ uint8_t gameover_screen_matrix[MATRIX_WIDTH][MATRIX_HEIGHT] = {
  *
  **********************************************************************************************************************/
 
-void game_graphics__display_splash_screen() {
+void game_graphics__display_splash_screen(void) {
   for (uint8_t row = 0; row < 32; row++) {
     for (uint8_t column = 0; column < 64; column++) {
       matrix_buffer[row][column] = (splash_screen_matrix[row + 32][column] << 3) + splash_screen_matrix[row][column];
     }
   }
-  led_matrix_basic_graphics__display_word_press_red_button(44, 11);
+  led_matrix_basic_graphics__display_word_press_red_button(44, 11, RED);
+}
+
+void game_graphics__display_victory_screen(void) {
+  game_graphics__display_explosion(10, 2, BLUE);
+  game_graphics__display_explosion(15, 10, RED);
+  game_graphics__display_explosion(8, 15, PURPLE);
+  game_graphics__display_explosion(8, 38, YELLOW);
+  game_graphics__display_explosion(10, 50, GREEN);
+  game_graphics__display_explosion(15, 45, ELECTRIC_BLUE);
+  game_graphics__display_ufo(20, 25, RED);
+  game_graphics__display_laser_cannon_bullet(25, 32, WHITE);
+  game_graphics__display_laser_cannon_bullet(25, 33, WHITE);
+  game_graphics__display_squid(32, 13, GREEN, true);
+  game_graphics__display_octopus(32, 27, PURPLE, false);
+  game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
+  led_matrix_basic_graphics__display_word_you_win(44, 11, PURPLE);
+  led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
 }
 
 void game_graphics__display_game_over_screen(void) {
@@ -324,8 +341,8 @@ void game_graphics__display_game_over_screen(void) {
           (gameover_screen_matrix[row + 32][column] << 3) + gameover_screen_matrix[row][column];
     }
   }
-  led_matrix_basic_graphics__display_word_game_over(44, 10);
-  led_matrix_basic_graphics__display_word_score(52, 15);
+  led_matrix_basic_graphics__display_word_game_over(44, 10, RED);
+  led_matrix_basic_graphics__display_word_score(52, 15, RED);
 }
 
 /*
@@ -577,7 +594,7 @@ void game_graphics__display_crab(uint8_t row, uint8_t column, led_color_e color,
 
 /*
  *
- *    ENTITY_SUBTYPE_2
+ *    ENTITY_SUBTYPE_1
  *
  *      SMALL SQUID
  *
