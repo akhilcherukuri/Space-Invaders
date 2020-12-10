@@ -333,9 +333,7 @@ void game_graphics__display_victory_screen(void) {
   game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
   led_matrix_basic_graphics__display_word_you_win(44, 11, PURPLE);
   led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
-  game_graphics__display_score_board(51, 42, WHITE, game_logic__get_game_overall_score());
-  // TODO: Need to display final overall score
-  // done but needs to be verified it works on the screen
+  game_graphics__display_score_board(51, 42, ELECTRIC_BLUE, game_logic__get_game_overall_score());
 }
 
 void game_graphics__display_game_over_screen(void) {
@@ -347,7 +345,7 @@ void game_graphics__display_game_over_screen(void) {
   }
   led_matrix_basic_graphics__display_word_game_over(44, 10, RED);
   led_matrix_basic_graphics__display_word_score(52, 15, RED);
-  game_graphics__display_score_board(51, 46, WHITE, game_logic__get_game_overall_score());
+  game_graphics__display_score_board(52, 46, ELECTRIC_BLUE, game_logic__get_game_overall_score());
 }
 
 /*
@@ -824,24 +822,64 @@ void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e c
   led_matrix__set_pixel(row + 9, column + 6, color);
 }
 
-void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, int score) {
-  static char score_char_array[3] = {'0', '0', '0'};
-  uint8_t original_column_value = column;
-  // clear scoreboard
-  for (int i = 3; i > 0; i--) {
-    led_matrix_basic_graphics__display_number(row, column, score_char_array[i - 1], BLACK);
-    column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i - 1]);
-  }
-  column = original_column_value;
+void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, uint8_t score) {
+  char score_char_array[3] = {'0', '0', '0'};
   sprintf(score_char_array, "%d", score);
-  for (int i = 3; i > 0; i--) {
-    if (score_char_array[i - 1] == 0) {
-      score_char_array[i - 1] = '0';
+  // clear scoreboard
+  if (score == 0) {
+    for (int i = 0; i < 3; i++) {
+      led_matrix_basic_graphics__display_number(row, column, 0, color);
+      column += led_matrix_basic_graphics__get_column_offset_for_number(0);
     }
-    led_matrix_basic_graphics__display_number(row, column, score_char_array[i - 1], color);
-    column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i - 1]);
+  } else if (score < 100) {
+    led_matrix_basic_graphics__display_number(row, column, 0, color);
+    column += led_matrix_basic_graphics__get_column_offset_for_number(0);
+    for (int i = 0; i < 2; i++) {
+      led_matrix_basic_graphics__display_number(row, column, score_char_array[i] - '0', color);
+      column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i] - '0');
+    }
+  } else {
+    for (int i = 0; i < 3; i++) {
+      led_matrix_basic_graphics__display_number(row, column, score_char_array[i] - '0', color);
+      column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i] - '0');
+    }
   }
 }
+
+// void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, uint8_t score) {
+//   int digit, previous_digit, zero_count = 0, flag = 0, rev_score = 0;
+
+//   if (score == 0)
+//     led_matrix_basic_graphics__display_number(row, column, score, color);
+
+//   while (score != 0) {
+//     previous_digit = digit = score % 10;
+//     if (digit != 0)
+//       flag = 1;
+//     if (flag == 0)
+//       zero_count++;
+//     rev_score = (rev_score * 10) + digit;
+//     score /= 10;
+//   }
+
+//   while (rev_score != 0) {
+//     digit = rev_score % 10;
+//     led_matrix_basic_graphics__display_number(row, column, digit, color);
+
+//     if (digit == 5)
+//       column += 5;
+//     else
+//       column += 4;
+
+//     rev_score /= 10;
+//   }
+
+//   while (zero_count != 0) {
+//     led_matrix_basic_graphics__display_number(row, column, zero_count, color);
+//     column += 5;
+//     zero_count--;
+//   }
+// }
 
 /*
  *

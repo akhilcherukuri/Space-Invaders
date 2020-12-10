@@ -53,7 +53,7 @@ static int outer_most_enemy_index = 0;
 
 static const int score_board_number_column_offset = 31;
 static const int score_board_number_row_offset = 5; // 3-11 rows are used
-static int overall_game_score = 0;
+static uint8_t overall_game_score = 0;
 
 static gpio_s joystick_left, joystick_right, start_button, shooting_button;
 
@@ -376,9 +376,11 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
                                                          cannon_bullets_array[i].column_position, BLACK);
               enemies_array[j - 1][k].is_valid = false;
               number_of_enemies_left--;
-              overall_game_score += enemies_array[j - 1][k].points;
-              game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, WHITE,
+              game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, BLACK,
                                                  overall_game_score);
+              overall_game_score += enemies_array[j - 1][k].points;
+              game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset,
+                                                 ELECTRIC_BLUE, overall_game_score);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
               // TODO: Suspend move enemies and shooting task during explotion animation
@@ -536,12 +538,15 @@ void game_logic__shoot_bullet(void) {
       cannon_bullets_array[i].is_valid = 1;
       cannon_bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
       cannon_bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
+      game_graphics__display_laser_cannon_bullet(
+          cannon_bullets_array[i].row_position, cannon_bullets_array[i].column_position, cannon_bullets_array[i].color);
       break;
     }
   }
 }
 
 void game_logic__update_bullet_location(void) {
+  game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy();
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid) {
       game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
@@ -558,7 +563,6 @@ void game_logic__update_bullet_location(void) {
       }
     }
   }
-  game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy();
 }
 
 void game_logic__check_valid_enemy_to_shoot_bullet(void) {

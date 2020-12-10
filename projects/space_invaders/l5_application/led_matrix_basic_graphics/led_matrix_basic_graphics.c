@@ -62,15 +62,15 @@ void led_matrix_basic_graphics__display_number(uint8_t row, uint8_t column, uint
     break;
   case 1:
     // Draw bottom side
-    for (uint8_t i = 0; i < 3; i++) {
+    for (uint8_t i = 1; i < 4; i++) {
       led_matrix__set_pixel(row + 4, column + i, color);
     }
     // Draw vertical line
     for (uint8_t i = 0; i < 5; i++) {
-      led_matrix__set_pixel(row + i, column + 1, color);
+      led_matrix__set_pixel(row + i, column + 2, color);
     }
     // Draw dot
-    led_matrix__set_pixel(row + 1, column, color);
+    led_matrix__set_pixel(row + 1, column + 1, color);
     break;
   case 2:
     // Draw top side
@@ -111,14 +111,13 @@ void led_matrix_basic_graphics__display_number(uint8_t row, uint8_t column, uint
     }
     break;
   case 5:
-    led_matrix__set_pixel(row + 0, column + 4, color);
     for (uint8_t i = 0; i < 4; i++) {
       led_matrix__set_pixel(row + 0, column + i, color);
       led_matrix__set_pixel(row + 2, column + i, color);
       led_matrix__set_pixel(row + 4, column + i, color);
     }
     led_matrix__set_pixel(row + 1, column + 0, color);
-    led_matrix__set_pixel(row + 3, column + 4, color);
+    led_matrix__set_pixel(row + 3, column + 3, color);
     break;
   case 6:
     for (uint8_t i = 1; i < 4; i++) {
@@ -134,13 +133,13 @@ void led_matrix_basic_graphics__display_number(uint8_t row, uint8_t column, uint
     led_matrix__set_pixel(row + 4, column + 2, color);
     break;
   case 7:
-    for (uint8_t i = 0; i < 3; i++) {
+    for (uint8_t i = 0; i < 4; i++) {
       led_matrix__set_pixel(row, column + i, color);
     }
-    led_matrix__set_pixel(row + 1, column + 2, color);
-    led_matrix__set_pixel(row + 2, column + 1, color);
-    led_matrix__set_pixel(row + 3, column + 0, color);
-    led_matrix__set_pixel(row + 4, column + 0, color);
+    led_matrix__set_pixel(row + 1, column + 3, color);
+    led_matrix__set_pixel(row + 2, column + 2, color);
+    led_matrix__set_pixel(row + 3, column + 1, color);
+    led_matrix__set_pixel(row + 4, column + 1, color);
     break;
   case 8:
     for (uint8_t i = 1; i < 3; i++) {
@@ -569,10 +568,17 @@ void led_matrix_basic_graphics__display_word_you_win(uint8_t row, uint8_t column
 uint8_t led_matrix_basic_graphics__get_column_offset_for_number(char number) {
   uint8_t offset;
   switch (number) {
+
   case '1':
-    offset = 3;
+    offset = 6;
+    break;
+  case '2':
+    offset = 6;
     break;
   case '5':
+    offset = 8;
+    break;
+  case '9':
     offset = 5;
     break;
   default: // all other cases are 4
