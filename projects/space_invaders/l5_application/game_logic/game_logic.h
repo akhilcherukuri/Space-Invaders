@@ -49,16 +49,18 @@ typedef struct {
  *
  **********************************************************************************************************************/
 void game_logic__initialize(void);
+void game_logic__respawn_enemies(void);
+void game_logic__respawn_enemies_bullets(void);
+void game_logic__respawn_laser_cannon_bullets(void);
 void game_logic__move_laser_cannon(void);
 void game_logic__move_enemies(void);
+void game_logic__shoot_bullet(void);
+void game_logic__update_bullet_location(void);
+void game_logic__check_valid_enemy_to_shoot_bullet(void);
 bool game_logic__get_game_won_status(void);
 void game_logic__set_game_won_status(bool status);
 bool game_logic__get_game_over_status(void);
 void game_logic__set_game_over_status(bool status);
-void game_logic__shoot_bullet(void);
-void game_logic__update_bullet_location(void);
-void game_logic__respawn_enemies(void);
-void game_logic__check_valid_enemy_to_shoot_bullet(void);
 int game_logic__get_game_overall_score(void);
 void game_logic__set_game_overall_score(int score);
-void game_logic__update_scoreboard(led_color_e color, int score);
+int game_logic__get_laser_cannon_lives(void);

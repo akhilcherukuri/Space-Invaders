@@ -331,7 +331,7 @@ void game_graphics__display_victory_screen(void) {
   game_graphics__display_squid(32, 13, GREEN, true);
   game_graphics__display_octopus(32, 27, PURPLE, false);
   game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
-  led_matrix_basic_graphics__display_word_you_win(44, 11, PURPLE);
+  led_matrix_basic_graphics__display_word_you_win(44, 13, PURPLE);
   led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
   game_graphics__display_score_board(51, 42, ELECTRIC_BLUE, game_logic__get_game_overall_score());
 }
