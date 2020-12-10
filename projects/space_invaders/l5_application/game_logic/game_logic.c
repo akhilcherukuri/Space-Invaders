@@ -377,7 +377,8 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               enemies_array[j - 1][k].is_valid = false;
               number_of_enemies_left--;
               overall_game_score += enemies_array[j - 1][k].points;
-              game_logic__update_scoreboard(WHITE, overall_game_score);
+              game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, WHITE,
+                                                 overall_game_score);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
               // TODO: Suspend move enemies and shooting task during explotion animation
@@ -591,9 +592,9 @@ int game_logic__get_game_overall_score(void) { return overall_game_score; }
 
 void game_logic__set_game_overall_score(int score) { overall_game_score = score; }
 
-void game_logic__update_scoreboard(led_color_e color, int score) {
-  char score_in_array[3];
-  sprintf(score_in_array, "%d", score); // converts score into array
-  game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, color,
-                                     score_in_array);
-}
+// void game_logic__update_scoreboard(led_color_e color, int score) {
+//   char score_in_array[3];
+//   sprintf(score_in_array, "%d", score); // converts score into array
+//   game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, color,
+//                                      score_in_array);
+// }

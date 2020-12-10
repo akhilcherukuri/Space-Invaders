@@ -8,6 +8,7 @@
 #include "led_matrix_basic_graphics.h"
 
 /* Standard Includes */
+#include <stdio.h>
 #include <string.h>
 
 /* External Includes */
@@ -332,7 +333,9 @@ void game_graphics__display_victory_screen(void) {
   game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
   led_matrix_basic_graphics__display_word_you_win(44, 11, PURPLE);
   led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
+  game_graphics__display_score_board(51, 42, WHITE, game_logic__get_game_overall_score());
   // TODO: Need to display final overall score
+  // done but needs to be verified it works on the screen
 }
 
 void game_graphics__display_game_over_screen(void) {
@@ -344,7 +347,7 @@ void game_graphics__display_game_over_screen(void) {
   }
   led_matrix_basic_graphics__display_word_game_over(44, 10, RED);
   led_matrix_basic_graphics__display_word_score(52, 15, RED);
-  // TODO: Need to display final overall score
+  game_graphics__display_score_board(51, 46, WHITE, game_logic__get_game_overall_score());
 }
 
 /*
@@ -821,23 +824,23 @@ void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e c
   led_matrix__set_pixel(row + 9, column + 6, color);
 }
 
-void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, char *score) {
-  static char previous_score[3] = {'0', '0', '0'};
-  const uint8_t original_column_value = column;
+void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, int score) {
+  static char score_char_array[3] = {'0', '0', '0'};
+  uint8_t original_column_value = column;
   // clear scoreboard
   for (int i = 3; i > 0; i--) {
-    led_matrix_basic_graphics__display_number(row, column, previous_score[i - 1], BLACK);
-    column += led_matrix_basic_graphics__get_column_offset_for_number(previous_score[i - 1]);
+    led_matrix_basic_graphics__display_number(row, column, score_char_array[i - 1], BLACK);
+    column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i - 1]);
   }
   column = original_column_value;
+  sprintf(score_char_array, "%d", score);
   for (int i = 3; i > 0; i--) {
-    if (score[i - 1] == 0) {
-      score[i - 1] = '0';
+    if (score_char_array[i - 1] == 0) {
+      score_char_array[i - 1] = '0';
     }
-    led_matrix_basic_graphics__display_number(row, column, score[i - 1], color);
-    column += led_matrix_basic_graphics__get_column_offset_for_number(score[i - 1]);
+    led_matrix_basic_graphics__display_number(row, column, score_char_array[i - 1], color);
+    column += led_matrix_basic_graphics__get_column_offset_for_number(score_char_array[i - 1]);
   }
-  memcpy(previous_score, score, sizeof(previous_score));
 }
 
 /*
