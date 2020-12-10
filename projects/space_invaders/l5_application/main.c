@@ -106,7 +106,11 @@ void display_scoreboard_task(void *p) {
   uint8_t start_column = 1;
   while (1) {
     led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
-    game_graphics__display_heart_symbol(8, 50, RED);
+    game_graphics__display_heart_symbol(5, 50, RED);
+    // TODO: Display lives
+    for (size_t i = 0; i < MATRIX_WIDTH; i++) {
+      led_matrix__set_pixel(10, i, WHITE);
+    }
     vTaskDelay(3);
   }
 }
