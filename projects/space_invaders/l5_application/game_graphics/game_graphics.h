@@ -46,3 +46,4 @@ void game_graphics__display_enemy_bullet(uint8_t row, uint8_t column, led_color_
 void game_graphics__display_laser_cannon_bullet(uint8_t row, uint8_t column, led_color_e color);
 void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e color);
 void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, char *score);
+void game_graphics__display_heart_symbol(uint8_t row, uint8_t column, led_color_e color);

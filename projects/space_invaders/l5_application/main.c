@@ -106,6 +106,7 @@ void display_scoreboard_task(void *p) {
   uint8_t start_column = 1;
   while (1) {
     led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
+    game_graphics__display_heart_symbol(8, 50, RED);
     vTaskDelay(3);
   }
 }
@@ -123,6 +124,7 @@ void start_screen_task(void *p) {
         is_game_started = true;
         led_matrix__clear_display();
         game_logic__respawn_enemies();
+        game_logic__set_game_overall_score(0);
         vTaskResume(display_scoreboard_task_handle);
         vTaskResume(move_laser_cannon_task_handle);
         vTaskResume(laser_cannon_shooting_task_handle);
@@ -171,7 +173,6 @@ void game_over_screen_task(void *p) {
         vTaskResume(start_screen_task_handle);
         led_matrix__clear_display();
         game_logic__set_game_over_status(false);
-        // when we reset scoreboard, inside reset__scoreboard call is__game_over to false;
       }
     }
     vTaskDelay(3);

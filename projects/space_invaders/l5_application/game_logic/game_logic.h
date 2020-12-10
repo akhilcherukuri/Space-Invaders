@@ -59,3 +59,6 @@ void game_logic__shoot_bullet(void);
 void game_logic__update_bullet_location(void);
 void game_logic__respawn_enemies(void);
 void game_logic__check_valid_enemy_to_shoot_bullet(void);
+int game_logic__get_game_overall_score(void);
+void game_logic__set_game_overall_score(int score);
+void game_logic__update_scoreboard(led_color_e color, int score);

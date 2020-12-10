@@ -565,3 +565,19 @@ void led_matrix_basic_graphics__display_word_you_win(uint8_t row, uint8_t column
   led_matrix__set_pixel(row + 2, column, color);
   led_matrix__set_pixel(row + 4, column, color);
 }
+
+uint8_t led_matrix_basic_graphics__get_column_offset_for_number(char number) {
+  uint8_t offset;
+  switch (number) {
+  case '1':
+    offset = 3;
+    break;
+  case '5':
+    offset = 5;
+    break;
+  default: // all other cases are 4
+    offset = 4;
+    break;
+  }
+  return offset;
+}

@@ -245,7 +245,6 @@ static int game_logic__private_determine_outer_most_valid_enemy(game_object_s *r
 
 static bool game_logic__private_horizontal_collision_imminent(void) {
   bool enemy_will_hit_wall = false;
-  // int outer_most_enemy_index = 0;
 
   for (size_t row = 0; row < MAX_ROW_OF_ENEMIES && !enemy_will_hit_wall; row++) {
     outer_most_enemy_index = game_logic__private_determine_outer_most_valid_enemy(&enemies_array[row]);
@@ -342,26 +341,25 @@ bool game_logic__decrease_laser_cannon_lives(void) {
 
 void game_logic__private_detect_bullet_collision_from_enemy(game_object_s *enemy) {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
-    if (enemy_bullets_array[i].is_valid == 1) {
+    if (enemy_bullets_array[i].is_valid) {
       if ((enemy_bullets_array[i].column_position <= laser_cannon.column_position) &&
           (laser_cannon.column_position <= laser_cannon.column_position + laser_cannon.width)) {
         enemy_bullets_array[i].is_valid = false;
         game_graphics__display_enemy_bullet(enemy_bullets_array[i].row_position, enemy_bullets_array->column_position,
                                             BLACK);
+        game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+        game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
+        // TODO: temporarely suspend the move enemies task, enemy shooting task, laser cannon task
+        // TODO: Add delay to show laser cannon explotion
+        game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+        // TODO: respawn laser cannon to default position and resume task
         if (game_logic__decrease_laser_cannon_lives()) { // calls function which decrements available lives and returns
                                                          // it
-          is_game_over = true;
+          game_logic__private_game_over();
         }
       }
     }
   }
-}
-
-void game_logic__private_update_scoreboard(led_color_e color, int score) {
-  char score_in_array[5];
-  // itoa(score, score_in_array, 10); // TODO: Fix this
-  game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, color,
-                                     score_in_array);
 }
 
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
@@ -377,14 +375,16 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
                                                          cannon_bullets_array[i].column_position, BLACK);
               enemies_array[j - 1][k].is_valid = false;
+              number_of_enemies_left--;
               overall_game_score += enemies_array[j - 1][k].points;
+              game_logic__update_scoreboard(WHITE, overall_game_score);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
-              game_logic__private_update_scoreboard(RED, overall_game_score);
+              // TODO: Suspend move enemies and shooting task during explotion animation
               vTaskDelay(15);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
-              number_of_enemies_left--;
+              // TODO: Resume move enemies and shooting task after explotion animation
               return;
             }
           }
@@ -585,4 +585,15 @@ void game_logic__respawn_enemies(void) {
   game_logic__private_spawn_squid(squid_row);
   game_logic__private_spawn_crab(crab_row);
   game_logic__private_spawn_octupus(octopus_row);
+}
+
+int game_logic__get_game_overall_score(void) { return overall_game_score; }
+
+void game_logic__set_game_overall_score(int score) { overall_game_score = score; }
+
+void game_logic__update_scoreboard(led_color_e color, int score) {
+  char score_in_array[3];
+  sprintf(score_in_array, "%d", score); // converts score into array
+  game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, color,
+                                     score_in_array);
 }

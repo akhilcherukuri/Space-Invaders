@@ -332,6 +332,7 @@ void game_graphics__display_victory_screen(void) {
   game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
   led_matrix_basic_graphics__display_word_you_win(44, 11, PURPLE);
   led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
+  // TODO: Need to display final overall score
 }
 
 void game_graphics__display_game_over_screen(void) {
@@ -343,6 +344,7 @@ void game_graphics__display_game_over_screen(void) {
   }
   led_matrix_basic_graphics__display_word_game_over(44, 10, RED);
   led_matrix_basic_graphics__display_word_score(52, 15, RED);
+  // TODO: Need to display final overall score
 }
 
 /*
@@ -820,12 +822,45 @@ void game_graphics__display_explosion(uint8_t row, uint8_t column, led_color_e c
 }
 
 void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, char *score) {
-  char previous_score[5] = {'0', '0', '0', '0', '0'};
-
-  for (int i = 0; i < 5; i++) {
-    led_matrix_basic_graphics__display_number(row, column, previous_score[i], BLACK);
-    led_matrix_basic_graphics__display_number(row, column, score[i], color);
-    column += 5;
+  static char previous_score[3] = {'0', '0', '0'};
+  const uint8_t original_column_value = column;
+  // clear scoreboard
+  for (int i = 3; i > 0; i--) {
+    led_matrix_basic_graphics__display_number(row, column, previous_score[i - 1], BLACK);
+    column += led_matrix_basic_graphics__get_column_offset_for_number(previous_score[i - 1]);
+  }
+  column = original_column_value;
+  for (int i = 3; i > 0; i--) {
+    if (score[i - 1] == 0) {
+      score[i - 1] = '0';
+    }
+    led_matrix_basic_graphics__display_number(row, column, score[i - 1], color);
+    column += led_matrix_basic_graphics__get_column_offset_for_number(score[i - 1]);
   }
   memcpy(previous_score, score, sizeof(previous_score));
+}
+
+/*
+ *
+ *       HEART
+ *
+ *        * *
+ *       *****
+ *       *****
+ *        ***
+ *         *
+ *
+ */
+
+void game_graphics__display_heart_symbol(uint8_t row, uint8_t column, led_color_e color) {
+  led_matrix__set_pixel(row + 0, column + 1, color);
+  led_matrix__set_pixel(row + 0, column + 3, color);
+  for (uint8_t i = 0; i < 5; i++) {
+    led_matrix__set_pixel(row + 1, column + i, color);
+    led_matrix__set_pixel(row + 2, column + i, color);
+  }
+  for (uint8_t i = 1; i < 4; i++) {
+    led_matrix__set_pixel(row + 3, column + i, color);
+  }
+  led_matrix__set_pixel(row + 4, column + 2, color);
 }

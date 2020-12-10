@@ -37,3 +37,5 @@ void led_matrix_basic_graphics__display_word_score(uint8_t row, uint8_t column, 
 void led_matrix_basic_graphics__display_word_press_red_button(uint8_t row, uint8_t column, led_color_e color);
 void led_matrix_basic_graphics__display_word_game_over(uint8_t row, uint8_t column, led_color_e color);
 void led_matrix_basic_graphics__display_word_you_win(uint8_t row, uint8_t column, led_color_e color);
+
+uint8_t led_matrix_basic_graphics__get_column_offset_for_number(char number);
