@@ -48,6 +48,7 @@
 
 static bool is_game_won = false;
 static bool is_game_over = false;
+static bool is_game_paused = false;
 
 static int number_of_lives = 3;
 
@@ -57,7 +58,6 @@ static int outer_most_enemy_index = 0;
 static const int score_board_number_column_offset = 31;
 static const int score_board_number_row_offset = 5; // 3-11 rows are used
 static uint8_t overall_game_score = 0;
-
 static gpio_s joystick_left, joystick_right, start_button, shooting_button;
 
 static const int laser_cannon_start_column_position = 26;
@@ -348,10 +348,15 @@ void game_logic__private_detect_bullet_collision_from_enemy(void) {
         game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
         game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
         // TODO: temporarely suspend the move enemies task, enemy shooting task, laser cannon task
+        // done with line below
+        is_game_paused = true;
         // TODO: Add delay to show laser cannon explosion
+        // done delay below
         vTaskDelay(15);
         game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+        is_game_paused = false;
         // TODO: respawn laser cannon to default position and resume task
+        // i believe this is done based off the commands below
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, BLACK);
         number_of_lives--;
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, ELECTRIC_BLUE);
@@ -387,10 +392,14 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
               // TODO: Suspend move enemies and shooting task during explotion animation
+              // done
+              is_game_paused = true;
               vTaskDelay(15);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
               // TODO: Resume move enemies and shooting task after explotion animation
+              // done with command above
+              is_game_paused = false;
               return;
             }
           }
@@ -557,21 +566,25 @@ void game_logic__move_laser_cannon(void) {
 }
 
 void game_logic__move_enemies(void) {
-  if (number_of_enemies_left > 0) {
-    if (game_logic__private_determine_enemy_movement()) {
-      for (size_t i = 0; i < MAX_ROW_OF_ENEMIES; i++) {
-        for (size_t j = 0; j < MAX_NUM_OF_ENEMIES; j++) {
-          if (enemies_array[i][j].is_valid) {
-            game_logic__private_display_enemy(&enemies_array[i][j]);
+  if (!is_game_paused) {
+    if (number_of_enemies_left > 0) {
+      if (game_logic__private_determine_enemy_movement()) {
+        for (size_t i = 0; i < MAX_ROW_OF_ENEMIES; i++) {
+          for (size_t j = 0; j < MAX_NUM_OF_ENEMIES; j++) {
+            if (enemies_array[i][j].is_valid) {
+              game_logic__private_display_enemy(&enemies_array[i][j]);
+            }
           }
         }
+        vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
+      } else {
+        game_logic__private_game_over();
       }
-      vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
     } else {
-      game_logic__private_game_over();
+      is_game_won = true;
     }
   } else {
-    is_game_won = true;
+    // do nothing
   }
 }
 
