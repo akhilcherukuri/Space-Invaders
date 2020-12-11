@@ -319,6 +319,7 @@ void game_graphics__display_splash_screen(void) {
 }
 
 void game_graphics__display_victory_screen(void) {
+  game_graphics__turn_on_decorative_led_bar(WHITE);
   game_graphics__display_explosion(10, 2, BLUE);
   game_graphics__display_explosion(15, 10, RED);
   game_graphics__display_explosion(8, 15, PURPLE);
@@ -331,7 +332,7 @@ void game_graphics__display_victory_screen(void) {
   game_graphics__display_squid(32, 13, GREEN, true);
   game_graphics__display_octopus(32, 27, PURPLE, false);
   game_graphics__display_crab(32, 44, ELECTRIC_BLUE, false);
-  led_matrix_basic_graphics__display_word_you_win(44, 13, PURPLE);
+  led_matrix_basic_graphics__display_word_you_win(44, 14, PURPLE);
   led_matrix_basic_graphics__display_word_score(51, 11, PURPLE);
   game_graphics__display_score_board(51, 42, ELECTRIC_BLUE, game_logic__get_game_overall_score());
 }
@@ -346,6 +347,14 @@ void game_graphics__display_game_over_screen(void) {
   led_matrix_basic_graphics__display_word_game_over(44, 10, RED);
   led_matrix_basic_graphics__display_word_score(52, 15, RED);
   game_graphics__display_score_board(52, 46, ELECTRIC_BLUE, game_logic__get_game_overall_score());
+}
+
+void game_graphics__turn_on_decorative_led_bar(led_color_e color) {
+  for (size_t i = 0; i < 64; i++) {
+    led_matrix__set_pixel(0, i, color);
+    led_matrix__set_pixel(1, i, color);
+    led_matrix__set_pixel(2, i, color);
+  }
 }
 
 /*
@@ -845,41 +854,6 @@ void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e
     }
   }
 }
-
-// void game_graphics__display_score_board(uint8_t row, uint8_t column, led_color_e color, uint8_t score) {
-//   int digit, previous_digit, zero_count = 0, flag = 0, rev_score = 0;
-
-//   if (score == 0)
-//     led_matrix_basic_graphics__display_number(row, column, score, color);
-
-//   while (score != 0) {
-//     previous_digit = digit = score % 10;
-//     if (digit != 0)
-//       flag = 1;
-//     if (flag == 0)
-//       zero_count++;
-//     rev_score = (rev_score * 10) + digit;
-//     score /= 10;
-//   }
-
-//   while (rev_score != 0) {
-//     digit = rev_score % 10;
-//     led_matrix_basic_graphics__display_number(row, column, digit, color);
-
-//     if (digit == 5)
-//       column += 5;
-//     else
-//       column += 4;
-
-//     rev_score /= 10;
-//   }
-
-//   while (zero_count != 0) {
-//     led_matrix_basic_graphics__display_number(row, column, zero_count, color);
-//     column += 5;
-//     zero_count--;
-//   }
-// }
 
 /*
  *

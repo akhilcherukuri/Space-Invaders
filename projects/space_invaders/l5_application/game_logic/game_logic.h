@@ -65,3 +65,4 @@ void game_logic__set_game_over_status(bool status);
 int game_logic__get_game_overall_score(void);
 void game_logic__set_game_overall_score(int score);
 int game_logic__get_laser_cannon_lives(void);
+bool game_logic__get_game_status_to_display_enemy_killed_animation(void);

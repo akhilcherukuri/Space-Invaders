@@ -41,6 +41,7 @@ void move_laser_cannon_task(void *p);
 void move_enemies_task(void *p);
 void laser_cannon_shooting_task(void *p);
 void enemy_shooting_task(void *p);
+void kill_animation_task(void *p);
 
 uint64_t button_pressed_time = 0;
 uint64_t button_last_time_pressed = 0;
@@ -69,8 +70,9 @@ int main(void) {
               &move_enemies_task_handle);
   xTaskCreate(laser_cannon_shooting_task, "laser cannon shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
               &laser_cannon_shooting_task_handle);
-  xTaskCreate(enemy_shooting_task, "enemy task for shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
+  xTaskCreate(enemy_shooting_task, "enemy shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
               &enemy_shooting_task_handle);
+  xTaskCreate(kill_animation_task, "kill animation", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
 
   sj2_cli__init();
   puts("Starting RTOS");
@@ -78,6 +80,12 @@ int main(void) {
 
   return 0;
 }
+
+/***********************************************************************************************************************
+ *
+ *                                                    T A S K S
+ *
+ **********************************************************************************************************************/
 
 void refresh_display_task(void *p) {
   while (1) {
@@ -88,11 +96,7 @@ void refresh_display_task(void *p) {
 
 void led_decorative_sign_task(void *p) {
   while (1) {
-    for (size_t i = 0; i < 64; i++) {
-      led_matrix__set_pixel(0, i, WHITE);
-      led_matrix__set_pixel(1, i, WHITE);
-      led_matrix__set_pixel(2, i, WHITE);
-    }
+    game_graphics__turn_on_decorative_led_bar(WHITE);
     vTaskDelay(3);
   }
 }
@@ -100,10 +104,14 @@ void led_decorative_sign_task(void *p) {
 void display_scoreboard_task(void *p) {
   uint8_t start_row = 5;
   uint8_t start_column = 1;
+  uint8_t score_row_position = 5;
+  uint8_t score_column_position = 31;
   while (1) {
     if (is_game_started) {
       led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
       game_graphics__display_heart_symbol(5, 50, RED);
+      game_graphics__display_score_board(score_row_position, score_column_position, ELECTRIC_BLUE,
+                                         game_logic__get_game_overall_score());
       led_matrix_basic_graphics__display_number(5, 56, game_logic__get_laser_cannon_lives(), ELECTRIC_BLUE);
       for (size_t i = 0; i < MATRIX_WIDTH; i++) {
         led_matrix__set_pixel(10, i, WHITE);
@@ -116,7 +124,6 @@ void display_scoreboard_task(void *p) {
 void start_screen_task(void *p) {
   while (1) {
     if (!is_game_started) {
-      led_matrix__clear_display();
       game_graphics__display_splash_screen();
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
@@ -151,8 +158,8 @@ void game_over_screen_task(void *p) {
       game_graphics__display_game_over_screen();
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
-        game_logic__set_game_over_status(false);
         vTaskResume(start_screen_task_handle);
+        game_logic__set_game_over_status(false);
       }
     }
     vTaskDelay(3);
@@ -197,6 +204,22 @@ void laser_cannon_shooting_task(void *p) {
     vTaskDelay(3);
   }
 }
+
+void kill_animation_task(void *p) {
+  while (1) {
+    if (game_logic__get_game_status_to_display_enemy_killed_animation()) {
+      vTaskSuspend(move_enemies_task_handle);
+    } else {
+      vTaskResume(move_enemies_task_handle);
+    }
+  }
+}
+
+/***********************************************************************************************************************
+ *
+ *                                                 I N T E R R U P T S
+ *
+ **********************************************************************************************************************/
 
 static void shooting_button_isr(void) {
   if (is_game_started) {

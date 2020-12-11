@@ -12,6 +12,7 @@
 #include <string.h>
 
 /* External Includes */
+#include "delay.h"
 #include "game_graphics.h"
 #include "gpio.h"
 #include "led_matrix_basic_graphics.h"
@@ -48,9 +49,9 @@
 
 static bool is_game_won = false;
 static bool is_game_over = false;
-static bool is_game_paused = false;
+static bool is_enemy_kill_animation = false;
 
-static int number_of_lives = 3;
+static int number_of_lives = 6;
 
 static int number_of_enemies_left;
 static int outer_most_enemy_index = 0;
@@ -78,7 +79,7 @@ static const TickType_t enemies_speed_delay_ms = 20;
 static const uint8_t led_matrix_left_boundary = 0;
 static const uint8_t led_matrix_right_boundary = 64;
 static const uint8_t led_matrix_top_boundary = 10;
-static const uint8_t led_matrix_bottom_boundary = 64;
+static const uint8_t led_matrix_bottom_boundary = 53;
 
 static const size_t enemy_column_delta = 1;
 static const size_t enemy_row_delta = 1;
@@ -164,7 +165,7 @@ void game_logic__private_spawn_crab(int starting_row) {
 }
 
 void game_logic__private_spawn_squid(int starting_row) {
-  uint8_t column_offset = 5;
+  uint8_t column_offset = 6;
   uint8_t row_offset = 12;
   uint8_t offset_between_rows = 1;
   uint8_t offset_between_columns = 6;
@@ -265,26 +266,13 @@ static bool game_logic__private_horizontal_collision_imminent(void) {
   return enemy_will_hit_wall;
 }
 
-static void game_logic__private_game_over(void) {
-  number_of_enemies_left = 12;
-  number_of_lives = 3;
-  is_game_over = true;
-  vTaskSuspend(NULL);
-}
-
 static bool game_logic__private_determine_enemy_movement(void) {
   bool enemy_will_hit_wall = game_logic__private_horizontal_collision_imminent();
 
   if (enemy_will_hit_wall) {
-    // puts("Imminent collision"); // TODO Remove after testing
     for (size_t row = 0; row < MAX_ROW_OF_ENEMIES; row++) {
       if (enemies_array[row][0].moving_direction == LEFT) {
         for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
-          // printf("Direction left: Enemy in row %d col %d Valid: %s Collision Index: %d Row Pos: %d Col Pos: %d\n",
-          // row,
-          //        col, enemies_array[row][col].is_valid ? "true" : "false", outer_most_enemy_index,
-          //        enemies_array[row][col].row_position, enemies_array[row][col].column_position); // TODO Remove after
-          //        testing
           game_logic__private_clear_enemy(&enemies_array[row][col]);
           enemies_array[row][col].moving_direction = RIGHT;
           enemies_array[row][col].row_position += enemy_row_delta;
@@ -294,11 +282,6 @@ static bool game_logic__private_determine_enemy_movement(void) {
         }
       } else if (enemies_array[row][0].moving_direction == RIGHT) {
         for (size_t col = 0; col < MAX_NUM_OF_ENEMIES; col++) {
-          // printf("Direction right: Enemy in row %d col %d Valid: %s Collision Index: %d Row Pos: %d Col Pos: %d\n",
-          // row,
-          //        col, enemies_array[row][col].is_valid ? "true" : "false", outer_most_enemy_index,
-          //        enemies_array[row][col].row_position, enemies_array[row][col].column_position); // TODO Remove after
-          //        testing
           game_logic__private_clear_enemy(&enemies_array[row][col]);
           enemies_array[row][col].row_position += enemy_row_delta;
           enemies_array[row][col].moving_direction = LEFT;
@@ -326,48 +309,45 @@ static bool game_logic__private_determine_enemy_movement(void) {
   return true;
 }
 
-bool game_logic__decrease_laser_cannon_lives(void) {
-  static uint8_t available_lives = 3;
-  bool is_still_alive = false;
-  --available_lives;
-  is_still_alive = (available_lives > 0) ? true : false;
-  return is_still_alive;
+void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
+  uint32_t destroy_cannon_animation_duration_ms = 400;
+
+  game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+  game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
+  delay__ms(destroy_cannon_animation_duration_ms);
+  game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+  game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+  laser_cannon.row_position = laser_cannon_start_row_position;
+  laser_cannon.column_position = laser_cannon_start_column_position;
 }
 
 void game_logic__private_detect_bullet_collision_from_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     if (enemy_bullets_array[i].is_valid) {
-      if ((enemy_bullets_array[i].column_position <= laser_cannon.column_position) &&
-          (enemy_bullets_array[i].column_position <= laser_cannon.column_position + laser_cannon.width)) {
+      if ((laser_cannon.column_position <= enemy_bullets_array[i].column_position + enemy_bullets_array[i].width) &&
+          (enemy_bullets_array[i].column_position + enemy_bullets_array[i].width <=
+           laser_cannon.column_position + laser_cannon.width) &&
+          (enemy_bullets_array[i].row_position >= (laser_cannon.row_position - laser_cannon.height))) {
         enemy_bullets_array[i].is_valid = false;
         game_graphics__display_enemy_bullet(enemy_bullets_array[i].row_position, enemy_bullets_array[i].column_position,
                                             BLACK);
-        game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
-        game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
-        // TODO: temporarely suspend the move enemies task, enemy shooting task, laser cannon task
-        // done with line below
-        is_game_paused = true;
-        // TODO: Add delay to show laser cannon explosion
-        // done delay below
-        vTaskDelay(15);
-        game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
-        is_game_paused = false;
-        // TODO: respawn laser cannon to default position and resume task
-        // i believe this is done based off the commands below
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, BLACK);
         number_of_lives--;
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, ELECTRIC_BLUE);
+        // TODO: Check why the explosion graphic leaves behind some pixels ON
+        game_logic__private_display_laser_cannon_destroy_aninimation();
+        if (number_of_lives == 0) {
+          is_game_over = true;
+        }
         break;
-        // if (number_of_lives > 0) { // calls function which decrements available lives and returns
-        //                            // it
-        //   game_logic__private_game_over();
-        // }
       }
     }
   }
 }
 
 void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
+  uint32_t kill_animation_duration_ms = 200;
+
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 1) {
       for (size_t j = MAX_ROW_OF_ENEMIES; j > 0; j--) {
@@ -375,7 +355,11 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
           if (enemies_array[j - 1][k].is_valid) {
             if ((enemies_array[j - 1][k].column_position <= cannon_bullets_array[i].column_position) &&
                 (cannon_bullets_array[i].column_position <=
-                 (enemies_array[j - 1][k].column_position + enemies_array[j - 1][k].width))) {
+                 (enemies_array[j - 1][k].column_position + enemies_array[j - 1][k].width)) &&
+                (enemies_array[j - 1][k].row_position >=
+                 cannon_bullets_array[i].row_position - cannon_bullets_array[i].height) &&
+                (cannon_bullets_array[i].row_position - cannon_bullets_array[i].height <=
+                 enemies_array[j - 1][k].row_position)) {
               cannon_bullets_array[i].is_valid = false;
               game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position,
                                                          cannon_bullets_array[i].column_position, BLACK);
@@ -386,18 +370,16 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               overall_game_score += enemies_array[j - 1][k].points;
               game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset,
                                                  ELECTRIC_BLUE, overall_game_score);
+              is_enemy_kill_animation = true;
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
-              // TODO: Suspend move enemies and shooting task during explotion animation
-              // done
-              is_game_paused = true;
-              vTaskDelay(15);
+              delay__ms(kill_animation_duration_ms);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
-              // TODO: Resume move enemies and shooting task after explotion animation
-              // done with command above
-              is_game_paused = false;
-              return;
+              is_enemy_kill_animation = false;
+              led_matrix__clear_display();
+              // return;
+              break;
             }
           }
         }
@@ -471,6 +453,8 @@ void game_logic__private_update_enemy_bullet_location(void) {
                                             enemy_bullets_array[i].color);
       } else {
         enemy_bullets_array[i].is_valid = false;
+        game_graphics__display_enemy_bullet(enemy_bullets_array[i].row_position, enemy_bullets_array[i].column_position,
+                                            BLACK);
       }
     }
   }
@@ -501,7 +485,7 @@ void game_logic__reset_game(void) {
   (void)game_logic__respawn_enemies();
   (void)game_logic__respawn_enemies_bullets();
   (void)game_logic__respawn_laser_cannon_bullets();
-  number_of_lives = 3;
+  number_of_lives = 6;
   overall_game_score = 0;
 }
 
@@ -521,7 +505,7 @@ void game_logic__respawn_enemies_bullets() {
     enemy_bullets_array[i].column_position = 0;
     enemy_bullets_array[i].row_position = 0;
     enemy_bullets_array[i].moving_direction = DOWN;
-    enemy_bullets_array[i].width = 1;
+    enemy_bullets_array[i].width = 2;
     enemy_bullets_array[i].height = 5;
     enemy_bullets_array[i].subtype = true;
     enemy_bullets_array[i].entity = ENEMY_BULLET;
@@ -564,25 +548,21 @@ void game_logic__move_laser_cannon(void) {
 }
 
 void game_logic__move_enemies(void) {
-  if (!is_game_paused) {
-    if (number_of_enemies_left > 0) {
-      if (game_logic__private_determine_enemy_movement()) {
-        for (size_t i = 0; i < MAX_ROW_OF_ENEMIES; i++) {
-          for (size_t j = 0; j < MAX_NUM_OF_ENEMIES; j++) {
-            if (enemies_array[i][j].is_valid) {
-              game_logic__private_display_enemy(&enemies_array[i][j]);
-            }
+  if (number_of_enemies_left > 0) {
+    if (game_logic__private_determine_enemy_movement()) {
+      for (size_t i = 0; i < MAX_ROW_OF_ENEMIES; i++) {
+        for (size_t j = 0; j < MAX_NUM_OF_ENEMIES; j++) {
+          if (enemies_array[i][j].is_valid) {
+            game_logic__private_display_enemy(&enemies_array[i][j]);
           }
         }
-        vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
-      } else {
-        game_logic__private_game_over();
       }
+      vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
     } else {
-      is_game_won = true;
+      is_game_over = true;
     }
   } else {
-    // do nothing
+    is_game_won = true;
   }
 }
 
@@ -594,8 +574,9 @@ void game_logic__shoot_bullet(void) {
       cannon_bullets_array[i].is_valid = 1;
       cannon_bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
       cannon_bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
-      game_graphics__display_laser_cannon_bullet(
-          cannon_bullets_array[i].row_position, cannon_bullets_array[i].column_position, cannon_bullets_array[i].color);
+      game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position + cannon_bullets_array[i].height,
+                                                 cannon_bullets_array[i].column_position,
+                                                 cannon_bullets_array[i].color);
       break;
     }
   }
@@ -641,3 +622,4 @@ void game_logic__set_game_over_status(bool status) { is_game_over = status; }
 int game_logic__get_game_overall_score(void) { return overall_game_score; }
 void game_logic__set_game_overall_score(int score) { overall_game_score = score; }
 int game_logic__get_laser_cannon_lives(void) { return number_of_lives; }
+bool game_logic__get_game_status_to_display_enemy_killed_animation(void) { return is_enemy_kill_animation; }

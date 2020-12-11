@@ -34,6 +34,7 @@
 void game_graphics__display_splash_screen(void);
 void game_graphics__display_victory_screen(void);
 void game_graphics__display_game_over_screen(void);
+void game_graphics__turn_on_decorative_led_bar(led_color_e color);
 void game_graphics__display_laser_cannon(uint8_t row, uint8_t column, led_color_e color);
 void game_graphics__display_octopus(uint8_t row, uint8_t column, led_color_e color,
                                     entity_subtype_t subtype); // Large Invader

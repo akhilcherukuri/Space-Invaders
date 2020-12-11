@@ -558,7 +558,7 @@ void led_matrix_basic_graphics__display_word_you_win(uint8_t row, uint8_t column
   led_matrix_basic_graphics__display_letter(row, column, 'N', color);
 
   // Display exclamation point
-  column += 8;
+  column += 7;
   led_matrix__set_pixel(row + 0, column, color);
   led_matrix__set_pixel(row + 1, column, color);
   led_matrix__set_pixel(row + 2, column, color);
