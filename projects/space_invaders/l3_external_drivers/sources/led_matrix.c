@@ -135,9 +135,9 @@ void led_matrix__display_pixels(void) {
 }
 
 void led_matrix__clear_display(void) {
-  for (uint8_t row = 0; row < 32; row++) {
-    for (uint8_t column = 0; column < 64; column++) {
-      matrix_buffer[row][column] = 0;
+  for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+    for (uint8_t column = 0; column < MATRIX_WIDTH; column++) {
+      matrix_buffer[row][column] = BLACK;
     }
   }
 }
@@ -157,7 +157,7 @@ void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color) {
   }
 }
 
-void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color) {
+void led_matrix__clear_pixel(uint8_t row, uint8_t column) {
 
   // Check if row or column are outbounds
   if ((row < 0) || (row > 63) || (column < 0) || (column > 63))
@@ -165,9 +165,8 @@ void led_matrix__clear_pixel(uint8_t row, uint8_t column, led_color_e color) {
 
   if (row > 31) {
     row = row - 32;
-    led_matrix__private_get_color_for_bottom_half_of_display(&color);
-    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & bottom_half_of_display_mask) | color);
+    matrix_buffer[row][column] = (matrix_buffer[row][column] & bottom_half_of_display_mask) | BLACK;
   } else {
-    matrix_buffer[row][column] &= ~((matrix_buffer[row][column] & upper_half_of_display_mask) | color);
+    matrix_buffer[row][column] = (matrix_buffer[row][column] & upper_half_of_display_mask) | BLACK;
   }
 }

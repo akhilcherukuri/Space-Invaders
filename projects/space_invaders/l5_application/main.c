@@ -212,6 +212,7 @@ void kill_animation_task(void *p) {
     } else {
       vTaskResume(move_enemies_task_handle);
     }
+    vTaskDelay(3);
   }
 }
 

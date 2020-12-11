@@ -309,6 +309,14 @@ static bool game_logic__private_determine_enemy_movement(void) {
   return true;
 }
 
+void game_logic__private_clear_laser_cannon_display_area(void) {
+  for (uint8_t row = 53; row < 61; row++) {
+    for (uint8_t column = 0; column < 64; column++) {
+      led_matrix__clear_pixel(row, column);
+    }
+  }
+}
+
 void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
   uint32_t destroy_cannon_animation_duration_ms = 400;
 
@@ -317,6 +325,7 @@ void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
   delay__ms(destroy_cannon_animation_duration_ms);
   game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
   game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
+  game_logic__private_clear_laser_cannon_display_area();
   laser_cannon.row_position = laser_cannon_start_row_position;
   laser_cannon.column_position = laser_cannon_start_column_position;
 }
@@ -334,7 +343,6 @@ void game_logic__private_detect_bullet_collision_from_enemy(void) {
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, BLACK);
         number_of_lives--;
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, ELECTRIC_BLUE);
-        // TODO: Check why the explosion graphic leaves behind some pixels ON
         game_logic__private_display_laser_cannon_destroy_aninimation();
         if (number_of_lives == 0) {
           is_game_over = true;
@@ -620,6 +628,5 @@ void game_logic__set_game_won_status(bool status) { is_game_won = status; }
 bool game_logic__get_game_over_status(void) { return is_game_over; }
 void game_logic__set_game_over_status(bool status) { is_game_over = status; }
 int game_logic__get_game_overall_score(void) { return overall_game_score; }
-void game_logic__set_game_overall_score(int score) { overall_game_score = score; }
 int game_logic__get_laser_cannon_lives(void) { return number_of_lives; }
 bool game_logic__get_game_status_to_display_enemy_killed_animation(void) { return is_enemy_kill_animation; }
