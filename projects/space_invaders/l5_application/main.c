@@ -21,22 +21,15 @@
 static void shooting_button_isr(void);
 static void start_button_isr(void);
 static void configure_gpio_interrupts(void);
+
 static SemaphoreHandle_t shooting_button_pressed;
 static SemaphoreHandle_t start_button_pressed;
 
-static TaskHandle_t display_scoreboard_task_handle;
 static TaskHandle_t start_screen_task_handle;
-static TaskHandle_t victory_screen_task_handle;
-static TaskHandle_t game_over_screen_task_handle;
 static TaskHandle_t move_laser_cannon_task_handle;
 static TaskHandle_t move_enemies_task_handle;
 static TaskHandle_t laser_cannon_shooting_task_handle;
 static TaskHandle_t enemy_shooting_task_handle;
-
-uint64_t button_pressed_time = 0;
-uint64_t button_last_time_pressed = 0;
-
-bool is_game_started = false;
 
 void refresh_display_task(void *p);
 void led_decorative_sign_task(void *p);
@@ -49,6 +42,11 @@ void move_enemies_task(void *p);
 void laser_cannon_shooting_task(void *p);
 void enemy_shooting_task(void *p);
 
+uint64_t button_pressed_time = 0;
+uint64_t button_last_time_pressed = 0;
+
+bool is_game_started = false;
+
 int main(void) {
 
   (void)led_matrix__initialize();
@@ -60,14 +58,11 @@ int main(void) {
 
   xTaskCreate(refresh_display_task, "refresh display", 4096 / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
   xTaskCreate(led_decorative_sign_task, "led decorative sign", 2048 / sizeof(void *), NULL, PRIORITY_LOW, NULL);
-  xTaskCreate(display_scoreboard_task, "display scoreboard", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-              &display_scoreboard_task_handle);
+  xTaskCreate(display_scoreboard_task, "display scoreboard", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
   xTaskCreate(start_screen_task, "start screen", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
               &start_screen_task_handle);
-  xTaskCreate(victory_screen_task, "victory screen", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-              &victory_screen_task_handle);
-  xTaskCreate(game_over_screen_task, "game over screen", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-              &game_over_screen_task_handle);
+  xTaskCreate(victory_screen_task, "victory screen", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(game_over_screen_task, "game over screen", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
   xTaskCreate(move_laser_cannon_task, "move laser cannon", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
               &move_laser_cannon_task_handle);
   xTaskCreate(move_enemies_task, "move enemies", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
