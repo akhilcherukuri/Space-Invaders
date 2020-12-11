@@ -49,6 +49,7 @@ typedef struct {
  *
  **********************************************************************************************************************/
 void game_logic__initialize(void);
+void game_logic__reset_game(void);
 void game_logic__respawn_enemies(void);
 void game_logic__respawn_enemies_bullets(void);
 void game_logic__respawn_laser_cannon_bullets(void);

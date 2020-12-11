@@ -106,11 +106,13 @@ void display_scoreboard_task(void *p) {
   uint8_t start_row = 5;
   uint8_t start_column = 1;
   while (1) {
-    led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
-    game_graphics__display_heart_symbol(5, 50, RED);
-    led_matrix_basic_graphics__display_number(5, 56, game_logic__get_laser_cannon_lives(), ELECTRIC_BLUE);
-    for (size_t i = 0; i < MATRIX_WIDTH; i++) {
-      led_matrix__set_pixel(10, i, WHITE);
+    if (is_game_started) {
+      led_matrix_basic_graphics__display_word_score(start_row, start_column, PURPLE);
+      game_graphics__display_heart_symbol(5, 50, RED);
+      led_matrix_basic_graphics__display_number(5, 56, game_logic__get_laser_cannon_lives(), ELECTRIC_BLUE);
+      for (size_t i = 0; i < MATRIX_WIDTH; i++) {
+        led_matrix__set_pixel(10, i, WHITE);
+      }
     }
     vTaskDelay(3);
   }
@@ -119,43 +121,12 @@ void display_scoreboard_task(void *p) {
 void start_screen_task(void *p) {
   while (1) {
     if (!is_game_started) {
-      // TODO: Kill Tasks below
-      // vTaskSuspend(display_scoreboard_task_handle);
-      // vTaskSuspend(move_laser_cannon_task_handle);
-      // vTaskSuspend(laser_cannon_shooting_task_handle);
-      // vTaskSuspend(move_enemies_task_handle);
-      // vTaskSuspend(enemy_shooting_task_handle);
-      vTaskDelete(display_scoreboard_task_handle);
-      vTaskDelete(move_laser_cannon_task_handle);
-      vTaskDelete(laser_cannon_shooting_task_handle);
-      vTaskDelete(move_enemies_task_handle);
-      vTaskDelete(enemy_shooting_task_handle);
+      led_matrix__clear_display();
       game_graphics__display_splash_screen();
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
+        game_logic__reset_game();
         led_matrix__clear_display();
-        game_logic__respawn_enemies();
-        game_logic__respawn_enemies_bullets();
-        game_logic__respawn_laser_cannon_bullets();
-        game_logic__set_game_overall_score(0);
-        // TODO: Create tasks below that says resum
-        // vTaskResume(display_scoreboard_task_handle);
-        // vTaskResume(move_laser_cannon_task_handle);
-        // vTaskResume(laser_cannon_shooting_task_handle);
-        // vTaskResume(move_enemies_task_handle);
-        // vTaskResume(enemy_shooting_task_handle);
-        // vTaskSuspend(start_screen_task_handle);
-        xTaskCreate(display_scoreboard_task, "display scoreboard", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-                    &display_scoreboard_task_handle);
-
-        xTaskCreate(move_laser_cannon_task, "move laser cannon", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-                    &move_laser_cannon_task_handle);
-        xTaskCreate(move_enemies_task, "move enemies", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-                    &move_enemies_task_handle);
-        xTaskCreate(laser_cannon_shooting_task, "laser cannon shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-                    &laser_cannon_shooting_task_handle);
-        xTaskCreate(enemy_shooting_task, "enemy task for shooting", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM,
-                    &enemy_shooting_task_handle);
         vTaskSuspend(start_screen_task_handle);
       }
     }
@@ -166,18 +137,12 @@ void start_screen_task(void *p) {
 void victory_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_won_status()) {
-      vTaskSuspend(display_scoreboard_task_handle);
-      vTaskSuspend(move_laser_cannon_task_handle);
-      vTaskSuspend(laser_cannon_shooting_task_handle);
-      vTaskSuspend(move_enemies_task_handle);
-      vTaskSuspend(enemy_shooting_task_handle);
       led_matrix__clear_display();
       game_graphics__display_victory_screen();
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
-        vTaskResume(start_screen_task_handle);
-        led_matrix__clear_display();
         game_logic__set_game_won_status(false);
+        vTaskResume(start_screen_task_handle);
       }
     }
     vTaskDelay(3);
@@ -187,18 +152,12 @@ void victory_screen_task(void *p) {
 void game_over_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_over_status()) {
-      vTaskSuspend(display_scoreboard_task_handle);
-      vTaskSuspend(move_laser_cannon_task_handle);
-      vTaskSuspend(laser_cannon_shooting_task_handle);
-      vTaskSuspend(move_enemies_task_handle);
-      vTaskSuspend(enemy_shooting_task_handle);
       led_matrix__clear_display();
       game_graphics__display_game_over_screen();
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
-        vTaskResume(start_screen_task_handle);
-        led_matrix__clear_display();
         game_logic__set_game_over_status(false);
+        vTaskResume(start_screen_task_handle);
       }
     }
     vTaskDelay(3);
@@ -207,40 +166,50 @@ void game_over_screen_task(void *p) {
 
 void move_laser_cannon_task(void *p) {
   while (1) {
-    game_logic__move_laser_cannon();
+    if (is_game_started) {
+      game_logic__move_laser_cannon();
+    }
     vTaskDelay(3);
   }
 }
 
 void move_enemies_task(void *p) {
   while (1) {
-    game_logic__move_enemies();
+    if (is_game_started) {
+      game_logic__move_enemies();
+    }
     vTaskDelay(3);
   }
 }
 
 void enemy_shooting_task(void *p) {
   while (1) {
-    game_logic__check_valid_enemy_to_shoot_bullet();
+    if (is_game_started) {
+      game_logic__check_valid_enemy_to_shoot_bullet();
+    }
     vTaskDelay(3);
   }
 }
 
 void laser_cannon_shooting_task(void *p) {
   while (1) {
-    game_logic__update_bullet_location();
-    if (xSemaphoreTake(shooting_button_pressed, 0)) {
-      game_logic__shoot_bullet();
+    if (is_game_started) {
+      game_logic__update_bullet_location();
+      if (xSemaphoreTake(shooting_button_pressed, 0)) {
+        game_logic__shoot_bullet();
+      }
     }
     vTaskDelay(3);
   }
 }
 
 static void shooting_button_isr(void) {
-  button_pressed_time = sys_time__get_uptime_ms();
-  if (button_pressed_time - button_last_time_pressed > 200) {
-    button_last_time_pressed = button_pressed_time;
-    xSemaphoreGiveFromISR(shooting_button_pressed, NULL);
+  if (is_game_started) {
+    button_pressed_time = sys_time__get_uptime_ms();
+    if (button_pressed_time - button_last_time_pressed > 200) {
+      button_last_time_pressed = button_pressed_time;
+      xSemaphoreGiveFromISR(shooting_button_pressed, NULL);
+    }
   }
 }
 

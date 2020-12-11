@@ -97,9 +97,7 @@ static game_object_s laser_cannon = {
 };
 
 static game_object_s enemies_array[MAX_ROW_OF_ENEMIES][MAX_NUM_OF_ENEMIES];
-
 static game_object_s enemy_bullets_array[MAX_NUM_OF_ENEMY_BULLETS];
-
 static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS];
 
 /***********************************************************************************************************************
@@ -339,7 +337,6 @@ bool game_logic__decrease_laser_cannon_lives(void) {
 void game_logic__private_detect_bullet_collision_from_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     if (enemy_bullets_array[i].is_valid) {
-      puts("I AM HERE\n");
       if ((enemy_bullets_array[i].column_position <= laser_cannon.column_position) &&
           (enemy_bullets_array[i].column_position <= laser_cannon.column_position + laser_cannon.width)) {
         enemy_bullets_array[i].is_valid = false;
@@ -497,7 +494,10 @@ void game_logic__initialize(void) {
   gpio__reset(start_button);
   gpio__reset(shooting_button);
 
-  memset(enemies_array, 0, sizeof(enemies_array));
+  (void)game_logic__reset_game();
+}
+
+void game_logic__reset_game(void) {
   (void)game_logic__respawn_enemies();
   (void)game_logic__respawn_enemies_bullets();
   (void)game_logic__respawn_laser_cannon_bullets();
@@ -512,11 +512,9 @@ void game_logic__respawn_enemies(void) {
 
   number_of_enemies_left = 12;
 
-  memset(enemies_array, 0, sizeof(enemies_array));
-
-  game_logic__private_spawn_squid(squid_row);
-  game_logic__private_spawn_crab(crab_row);
-  game_logic__private_spawn_octupus(octopus_row);
+  (void)game_logic__private_spawn_squid(squid_row);
+  (void)game_logic__private_spawn_crab(crab_row);
+  (void)game_logic__private_spawn_octupus(octopus_row);
 }
 void game_logic__respawn_enemies_bullets() {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
