@@ -16,6 +16,7 @@
 #include "game_graphics.h"
 #include "gpio.h"
 #include "led_matrix_basic_graphics.h"
+#include "uart.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -344,6 +345,7 @@ void game_logic__private_detect_bullet_collision_from_enemy(void) {
         number_of_lives--;
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, ELECTRIC_BLUE);
         game_logic__private_display_laser_cannon_destroy_aninimation();
+        game_logic__private_send_music_opcode(explosion);
         if (number_of_lives == 0) {
           is_game_over = true;
         }
@@ -381,12 +383,13 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               is_enemy_kill_animation = true;
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
+              game_logic__private_send_music_opcode(explosion);
               delay__ms(kill_animation_duration_ms);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
               is_enemy_kill_animation = false;
               led_matrix__clear_display();
-              // return;
+              game_logic__private_send_music_opcode(invader_killed);
               break;
             }
           }
@@ -445,6 +448,7 @@ void game_logic__private_enemy_shoot_bullet(game_object_s *enemy) {
       enemy_bullets_array[i].row_position = enemy->row_position + row_offset_below_enemy;
       enemy_bullets_array[i].column_position =
           (enemy->column_position + (enemy->width / 2)) - column_offset_to_center_bullet;
+      game_logic__private_send_music_opcode(shoot_bullet);
       break;
     }
   }
@@ -467,6 +471,11 @@ void game_logic__private_update_enemy_bullet_location(void) {
     }
   }
   game_logic__private_detect_bullet_collision_from_enemy();
+}
+
+void game_logic__private_send_music_opcode(song_list_e opcode) {
+  uint8_t timeout_ms = 5;
+  uart__put(UART__3, opcode, timeout_ms);
 }
 
 /***********************************************************************************************************************
@@ -565,6 +574,7 @@ void game_logic__move_enemies(void) {
           }
         }
       }
+      game_logic__private_send_music_opcode(invader_move);
       vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
     } else {
       is_game_over = true;
@@ -585,6 +595,7 @@ void game_logic__shoot_bullet(void) {
       game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position + cannon_bullets_array[i].height,
                                                  cannon_bullets_array[i].column_position,
                                                  cannon_bullets_array[i].color);
+      game_logic__private_send_music_opcode(shoot_bullet);
       break;
     }
   }

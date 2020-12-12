@@ -43,6 +43,13 @@ typedef struct {
   int points;
 } game_object_s;
 
+typedef enum {
+  invader_killed = 0x1,
+  shoot_bullet = 0x2,
+  explosion = 0x3,
+  invader_move = 0x4,
+} song_list_e;
+
 /***********************************************************************************************************************
  *
  *                                     F U N C T I O N   D E C L A R A T I O N S
