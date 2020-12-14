@@ -392,7 +392,7 @@ static void configure_gpio_interrupts(void) {
  *
  **********************************************************************************************************************/
 
-void initialize_uart_for_boards(void) {
+static void initialize_uart_for_boards(void) {
   gpio__construct_with_function(GPIO__PORT_4, 28, GPIO__FUNCTION_2); // tx pin
   gpio__construct_with_function(GPIO__PORT_4, 29, GPIO__FUNCTION_2); // rx pin
   send_uart = xQueueCreate(1, sizeof(char));
@@ -402,7 +402,7 @@ void initialize_uart_for_boards(void) {
 }
 
 #if GAME_BOARD
-void initialize_game_logic_board(void) {
+static void initialize_game_logic_board(void) {
   (void)led_matrix__initialize();
   (void)game_logic__initialize();
   (void)initialize_uart_for_boards();
@@ -429,7 +429,7 @@ void initialize_game_logic_board(void) {
   xTaskCreate(kill_animation_task, "kill animation", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
 }
 #else
-void initialize_game_sound_board(void) {
+static void initialize_game_sound_board(void) {
   (void)initialize_uart_for_boards();
   (void)configure_gpio_interrupts();
 
