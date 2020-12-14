@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 
@@ -47,29 +48,29 @@ static TaskHandle_t move_enemies_task_handle;
 static TaskHandle_t laser_cannon_shooting_task_handle;
 static TaskHandle_t enemy_shooting_task_handle;
 
-bool is_game_started = false;
+static bool is_game_started = false;
 #endif
 
-uint64_t button_pressed_time = 0;
-uint64_t button_last_time_pressed = 0;
+static uint64_t button_pressed_time = 0;
+static uint64_t button_last_time_pressed = 0;
 
 #if GAME_BOARD
-void refresh_display_task(void *p);
-void led_decorative_sign_task(void *p);
-void display_scoreboard_task(void *p);
-void start_screen_task(void *p);
-void victory_screen_task(void *p);
-void game_over_screen_task(void *p);
-void move_laser_cannon_task(void *p);
-void move_enemies_task(void *p);
-void laser_cannon_shooting_task(void *p);
-void enemy_shooting_task(void *p);
-void kill_animation_task(void *p);
+static void refresh_display_task(void *p);
+static void led_decorative_sign_task(void *p);
+static void display_scoreboard_task(void *p);
+static void start_screen_task(void *p);
+static void victory_screen_task(void *p);
+static void game_over_screen_task(void *p);
+static void move_laser_cannon_task(void *p);
+static void move_enemies_task(void *p);
+static void laser_cannon_shooting_task(void *p);
+static void enemy_shooting_task(void *p);
+static void kill_animation_task(void *p);
 #else
-void volume_control_task(void *p);
-void which_song_to_play_task(void *p);
-void play_game_sound_task(void *p);
-void audio_decoder_task(void *p);
+static void volume_control_task(void *p);
+static void which_song_to_play_task(void *p);
+static void play_game_sound_task(void *p);
+static void audio_decoder_task(void *p);
 #endif
 
 #if GAME_BOARD
@@ -82,12 +83,12 @@ static void volume_down_isr(void);
 static void configure_gpio_interrupts(void);
 #endif
 
-void initialize_uart_for_boards(void);
+static void initialize_uart_for_boards(void);
 
 #if GAME_BOARD
-void initialize_game_logic_board(void);
+static void initialize_game_logic_board(void);
 #else
-void initialize_game_sound_board(void);
+static void initialize_game_sound_board(void);
 #endif
 
 int main(void) {
@@ -113,21 +114,21 @@ int main(void) {
 
 #if GAME_BOARD
 
-void refresh_display_task(void *p) {
+static void refresh_display_task(void *p) {
   while (1) {
     led_matrix__display_pixels();
     vTaskDelay(3);
   }
 }
 
-void led_decorative_sign_task(void *p) {
+static void led_decorative_sign_task(void *p) {
   while (1) {
     game_graphics__turn_on_decorative_led_bar(WHITE);
     vTaskDelay(3);
   }
 }
 
-void display_scoreboard_task(void *p) {
+static void display_scoreboard_task(void *p) {
   uint8_t start_row = 5;
   uint8_t start_column = 1;
   uint8_t score_row_position = 5;
@@ -147,7 +148,7 @@ void display_scoreboard_task(void *p) {
   }
 }
 
-void start_screen_task(void *p) {
+static void start_screen_task(void *p) {
   while (1) {
     if (!is_game_started) {
       game_graphics__display_splash_screen();
@@ -162,7 +163,7 @@ void start_screen_task(void *p) {
   }
 }
 
-void victory_screen_task(void *p) {
+static void victory_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_won_status()) {
       led_matrix__clear_display();
@@ -177,7 +178,7 @@ void victory_screen_task(void *p) {
   }
 }
 
-void game_over_screen_task(void *p) {
+static void game_over_screen_task(void *p) {
   while (1) {
     if (game_logic__get_game_over_status()) {
       led_matrix__clear_display();
@@ -192,7 +193,7 @@ void game_over_screen_task(void *p) {
   }
 }
 
-void move_laser_cannon_task(void *p) {
+static void move_laser_cannon_task(void *p) {
   while (1) {
     if (is_game_started) {
       game_logic__move_laser_cannon();
@@ -201,7 +202,7 @@ void move_laser_cannon_task(void *p) {
   }
 }
 
-void move_enemies_task(void *p) {
+static void move_enemies_task(void *p) {
   while (1) {
     if (is_game_started) {
       game_logic__move_enemies();
@@ -210,7 +211,7 @@ void move_enemies_task(void *p) {
   }
 }
 
-void enemy_shooting_task(void *p) {
+static void enemy_shooting_task(void *p) {
   while (1) {
     if (is_game_started) {
       game_logic__check_valid_enemy_to_shoot_bullet();
@@ -219,7 +220,7 @@ void enemy_shooting_task(void *p) {
   }
 }
 
-void laser_cannon_shooting_task(void *p) {
+static void laser_cannon_shooting_task(void *p) {
   while (1) {
     if (is_game_started) {
       game_logic__update_bullet_location();
@@ -231,7 +232,7 @@ void laser_cannon_shooting_task(void *p) {
   }
 }
 
-void kill_animation_task(void *p) {
+static void kill_animation_task(void *p) {
   while (1) {
     if (game_logic__get_game_status_to_display_enemy_killed_animation()) {
       vTaskSuspend(move_enemies_task_handle);
@@ -244,7 +245,7 @@ void kill_animation_task(void *p) {
 
 #else
 
-void volume_control_task(void *p) {
+static void volume_control_task(void *p) {
   while (1) {
     static uint16_t volume = 0x0101;
     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
@@ -260,10 +261,10 @@ void volume_control_task(void *p) {
   vTaskDelay(3);
 }
 
-void which_song_to_play_task(void *p) {
+static void which_song_to_play_task(void *p) {
   char *song_file = NULL;
   char song_number;
-  uart__enable_queues(UART__3, send_uart, receive_uart);
+  // uart__enable_queues(UART__3, send_uart, receive_uart);
   while (1) {
     uart__get(UART__3, &song_number, 5000);
     if (song_number == '1') {
@@ -282,7 +283,7 @@ void which_song_to_play_task(void *p) {
       // do nothing
     }
     song_number = 0;
-    vTaskDelay(1);
+    vTaskDelay(3);
   }
 }
 
@@ -301,11 +302,11 @@ void play_game_sound_task(void *p) {
     f_close(&file);
     // xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
     f_open(&file, song_file, FA_READ);
-    vTaskDelay(1);
+    vTaskDelay(3);
   }
 }
 
-void audio_decoder_task(void *p) {
+static void audio_decoder_task(void *p) {
   unsigned char data[512];
   while (1) {
     if (xQueueReceive(mp3_file_data, &data, portMAX_DELAY)) {
@@ -317,9 +318,10 @@ void audio_decoder_task(void *p) {
               mp3_decoder__sdi(data[byte]);
             }
             byte_counter += 32;
-          } else {
-            vTaskDelay(1);
           }
+          // } else {
+          //   vTaskDelay(1);
+          // }
         }
         xSemaphoreGive(mp3_mutex);
       }
@@ -434,8 +436,10 @@ void initialize_game_logic_board(void) {
 void initialize_game_sound_board(void) {
   (void)initialize_uart_for_boards();
   (void)configure_gpio_interrupts();
-  volume_down_button_pressed = xSemaphoreCreateBinary();
+
   volume_up_button_pressed = xSemaphoreCreateBinary();
+  volume_down_button_pressed = xSemaphoreCreateBinary();
+
   gpio_s dreq = {GPIO__PORT_2, 0};
   gpio_s xcs = {GPIO__PORT_2, 2};
   gpio_s xdcs = {GPIO__PORT_2, 5};
@@ -446,16 +450,14 @@ void initialize_game_sound_board(void) {
   gpio__construct_with_function(GPIO__PORT_0, 7, GPIO__FUNCTION_2); // SCK
   gpio__construct_with_function(GPIO__PORT_0, 9, GPIO__FUNCTION_2); // MOSI
   gpio__construct_with_function(GPIO__PORT_0, 8, GPIO__FUNCTION_2); // MISO
+
+  gpio__set_as_output(xdcs);
+  gpio__set_as_output(xcs);
+  gpio__set_as_output(rst);
+  gpio__set_as_input(dreq);
   gpio__set_as_input(volume_up);
   gpio__set_as_input(volume_down);
-  gpio__set_function(xdcs, GPIO__FUNCITON_0_IO_PIN);
-  gpio__set_as_output(xdcs);
-  gpio__set_function(xcs, GPIO__FUNCITON_0_IO_PIN);
-  gpio__set_as_output(xcs);
-  gpio__set_function(rst, GPIO__FUNCITON_0_IO_PIN);
-  gpio__set_as_output(rst);
-  gpio__set_function(dreq, GPIO__FUNCITON_0_IO_PIN);
-  gpio__set_as_input(dreq);
+
   mp3_decoder__init(xcs, xdcs, dreq, rst);
 
   xTaskCreate(play_game_sound_task, "Play song", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
