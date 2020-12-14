@@ -264,7 +264,6 @@ static void volume_control_task(void *p) {
 static void which_song_to_play_task(void *p) {
   char *song_file = NULL;
   char song_number;
-  // uart__enable_queues(UART__3, send_uart, receive_uart);
   while (1) {
     uart__get(UART__3, &song_number, 5000);
     if (song_number == '1') {
@@ -300,7 +299,7 @@ void play_game_sound_task(void *p) {
       xQueueSend(mp3_file_data, &bytes_512[0], portMAX_DELAY);
     }
     f_close(&file);
-    // xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
+    xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
     f_open(&file, song_file, FA_READ);
     vTaskDelay(3);
   }
@@ -319,9 +318,6 @@ static void audio_decoder_task(void *p) {
             }
             byte_counter += 32;
           }
-          // } else {
-          //   vTaskDelay(1);
-          // }
         }
         xSemaphoreGive(mp3_mutex);
       }
