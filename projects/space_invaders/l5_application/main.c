@@ -2,6 +2,9 @@
 #include <stdio.h>
 
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
+
 #include "delay.h"
 #include "ff.h"
 #include "game_graphics.h"
@@ -11,10 +14,8 @@
 #include "led_matrix.h"
 #include "led_matrix_basic_graphics.h"
 #include "mp3_decoder.h"
-#include "semphr.h"
 #include "sj2_cli.h"
 #include "sys_time.h"
-#include "task.h"
 #include "uart.h"
 
 #include "lpc40xx.h"
@@ -22,33 +23,37 @@
 
 #define GAME_BOARD 0
 
+#if GAME_BOARD
 static SemaphoreHandle_t shooting_button_pressed;
 static SemaphoreHandle_t start_button_pressed;
+#else
 static SemaphoreHandle_t volume_up_button_pressed;
 static SemaphoreHandle_t volume_down_button_pressed;
 static SemaphoreHandle_t mp3_mutex = NULL;
 
-static QueueHandle_t send_uart;
-static QueueHandle_t receive_uart;
 static QueueHandle_t mp3_file_data;
 static QueueHandle_t what_song_to_play;
 
 FIL file;
+#endif
 
-#ifdef GAME_BOARD
+static QueueHandle_t send_uart;
+static QueueHandle_t receive_uart;
+
+#if GAME_BOARD
 static TaskHandle_t start_screen_task_handle;
 static TaskHandle_t move_laser_cannon_task_handle;
 static TaskHandle_t move_enemies_task_handle;
 static TaskHandle_t laser_cannon_shooting_task_handle;
 static TaskHandle_t enemy_shooting_task_handle;
 
-uint64_t button_pressed_time = 0;
-uint64_t button_last_time_pressed = 0;
-
 bool is_game_started = false;
 #endif
 
-#ifdef GAME_BOARD
+uint64_t button_pressed_time = 0;
+uint64_t button_last_time_pressed = 0;
+
+#if GAME_BOARD
 void refresh_display_task(void *p);
 void led_decorative_sign_task(void *p);
 void display_scoreboard_task(void *p);
@@ -61,23 +66,25 @@ void laser_cannon_shooting_task(void *p);
 void enemy_shooting_task(void *p);
 void kill_animation_task(void *p);
 #else
-void volume_control(void *p);
-void which_song_to_play(void *p);
-void play_game_sound(void *p);
-void audio_decoder__task(void *p);
+void volume_control_task(void *p);
+void which_song_to_play_task(void *p);
+void play_game_sound_task(void *p);
+void audio_decoder_task(void *p);
 #endif
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
 static void shooting_button_isr(void);
 static void start_button_isr(void);
 static void configure_gpio_interrupts(void);
 #else
-static void volume_up_isr(void) static void volume_down_isr(void) static void configure_gpio_interrupts(void);
+static void volume_up_isr(void);
+static void volume_down_isr(void);
+static void configure_gpio_interrupts(void);
 #endif
 
 void initialize_uart_for_boards(void);
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
 void initialize_game_logic_board(void);
 #else
 void initialize_game_sound_board(void);
@@ -85,7 +92,7 @@ void initialize_game_sound_board(void);
 
 int main(void) {
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
   initialize_game_logic_board();
 #else
   initialize_game_sound_board();
@@ -104,7 +111,7 @@ int main(void) {
  *
  **********************************************************************************************************************/
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
 
 void refresh_display_task(void *p) {
   while (1) {
@@ -237,7 +244,7 @@ void kill_animation_task(void *p) {
 
 #else
 
-void volume_control(void *p) {
+void volume_control_task(void *p) {
   while (1) {
     static uint16_t volume = 0x0101;
     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
@@ -253,7 +260,7 @@ void volume_control(void *p) {
   vTaskDelay(3);
 }
 
-void which_song_to_play(void *params) {
+void which_song_to_play_task(void *p) {
   char *song_file = NULL;
   char song_number;
   uart__enable_queues(UART__3, send_uart, receive_uart);
@@ -279,7 +286,7 @@ void which_song_to_play(void *params) {
   }
 }
 
-void play_game_sound(void *params) {
+void play_game_sound_task(void *p) {
   char *song_file = "shoot.wav";
   unsigned char bytes_512[512];
   UINT bytes_read = 0;
@@ -292,12 +299,13 @@ void play_game_sound(void *params) {
       xQueueSend(mp3_file_data, &bytes_512[0], portMAX_DELAY);
     }
     f_close(&file);
-    xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
+    // xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
     f_open(&file, song_file, FA_READ);
+    vTaskDelay(1);
   }
 }
 
-void audio_decoder__task(void *params) {
+void audio_decoder_task(void *p) {
   unsigned char data[512];
   while (1) {
     if (xQueueReceive(mp3_file_data, &data, portMAX_DELAY)) {
@@ -315,8 +323,8 @@ void audio_decoder__task(void *params) {
         }
         xSemaphoreGive(mp3_mutex);
       }
-      vTaskDelay(3);
     }
+    vTaskDelay(3);
   }
 }
 #endif
@@ -327,7 +335,7 @@ void audio_decoder__task(void *params) {
  *
  **********************************************************************************************************************/
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
 
 static void shooting_button_isr(void) {
   if (is_game_started) {
@@ -357,22 +365,18 @@ static void configure_gpio_interrupts(void) {
 }
 #else
 static void volume_down_isr(void) {
-  if (is_game_started) {
-    button_pressed_time = sys_time__get_uptime_ms();
-    if (button_pressed_time - button_last_time_pressed > 200) {
-      button_last_time_pressed = button_pressed_time;
-      xSemaphoreGiveFromISR(volume_down_button_pressed, NULL);
-    }
+  button_pressed_time = sys_time__get_uptime_ms();
+  if (button_pressed_time - button_last_time_pressed > 200) {
+    button_last_time_pressed = button_pressed_time;
+    xSemaphoreGiveFromISR(volume_down_button_pressed, NULL);
   }
 }
 
 static void volume_up_isr(void) {
-  if (is_game_started) {
-    button_pressed_time = sys_time__get_uptime_ms();
-    if (button_pressed_time - button_last_time_pressed > 200) {
-      button_last_time_pressed = button_pressed_time;
-      xSemaphoreGiveFromISR(volume_up_button_pressed, NULL);
-    }
+  button_pressed_time = sys_time__get_uptime_ms();
+  if (button_pressed_time - button_last_time_pressed > 200) {
+    button_last_time_pressed = button_pressed_time;
+    xSemaphoreGiveFromISR(volume_up_button_pressed, NULL);
   }
 }
 
@@ -396,10 +400,10 @@ void initialize_uart_for_boards(void) {
   send_uart = xQueueCreate(1, sizeof(char));
   receive_uart = xQueueCreate(1, sizeof(char));
   uart__init(UART__3, clock__get_peripheral_clock_hz(), 9600);
-  uart__enable_queues(UART__3, send_uart, receive_uart);
+  uart__enable_queues(UART__3, receive_uart, send_uart);
 }
 
-#ifdef GAME_BOARD
+#if GAME_BOARD
 void initialize_game_logic_board(void) {
   (void)led_matrix__initialize();
   (void)game_logic__initialize();
@@ -429,19 +433,22 @@ void initialize_game_logic_board(void) {
 #else
 void initialize_game_sound_board(void) {
   (void)initialize_uart_for_boards();
+  (void)configure_gpio_interrupts();
+  volume_down_button_pressed = xSemaphoreCreateBinary();
   volume_up_button_pressed = xSemaphoreCreateBinary();
-  volumn_down_button_pressed = xSemaphoreCreateBinary();
   gpio_s dreq = {GPIO__PORT_2, 0};
   gpio_s xcs = {GPIO__PORT_2, 2};
   gpio_s xdcs = {GPIO__PORT_2, 5};
   gpio_s rst = {GPIO__PORT_2, 7};
   gpio_s volume_up = {GPIO__PORT_0, 26};
-  gpio_s volume_down = {GPIO__PORT_2, 25};
+  gpio_s volume_down = {GPIO__PORT_0, 25};
 
   gpio__construct_with_function(GPIO__PORT_0, 7, GPIO__FUNCTION_2); // SCK
   gpio__construct_with_function(GPIO__PORT_0, 9, GPIO__FUNCTION_2); // MOSI
   gpio__construct_with_function(GPIO__PORT_0, 8, GPIO__FUNCTION_2); // MISO
-  gpio__set_as_input() gpio__set_function(xdcs, GPIO__FUNCITON_0_IO_PIN);
+  gpio__set_as_input(volume_up);
+  gpio__set_as_input(volume_down);
+  gpio__set_function(xdcs, GPIO__FUNCITON_0_IO_PIN);
   gpio__set_as_output(xdcs);
   gpio__set_function(xcs, GPIO__FUNCITON_0_IO_PIN);
   gpio__set_as_output(xcs);
@@ -451,9 +458,9 @@ void initialize_game_sound_board(void) {
   gpio__set_as_input(dreq);
   mp3_decoder__init(xcs, xdcs, dreq, rst);
 
-  xTaskCreate(play_game_sound, "PlaySong", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
-  xTaskCreate(audio_decoder__task, "MP3 decoding", 2048 / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
-  xTaskCreate(which_song_to_play, "song selection", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
-  xTaskCreate(volume_control, "Change volume", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(play_game_sound_task, "Play song", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(audio_decoder_task, "MP3 decoding", 2048 / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
+  xTaskCreate(which_song_to_play_task, "Song selection", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(volume_control_task, "Change volume", 2048 / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
 }
 #endif

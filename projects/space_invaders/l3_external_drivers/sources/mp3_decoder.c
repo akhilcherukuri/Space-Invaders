@@ -52,12 +52,10 @@ void mp3_decoder__init(gpio_s xcs, gpio_s xdcs, gpio_s dreq, gpio_s rst) {
   // set xcs xdcs reset output
   // MCU outputs reset as a low, set chip selects as high
   uint32_t set_12_mhz_clock = 12 * 1000 * 1000;
-  // uint8_t enable_SM_EARSPEAKER_LO = 4;
-  // uint8_t enable_SM_TESTS = 5;
-  // uint8_t enable_SM_SDINEW = 11;
   uint16_t sci_mode_register_defaults = 0x4800;
   uint16_t default_sample_11hz = 0x2B10;
   uint16_t default_clockf_divide = 0xD800;
+  uint16_t default_volume_70_percent = 0x0101;
   dreq_pin = dreq;
   xdcs_pin = xdcs;
   xcs_pin = xcs;
@@ -70,7 +68,7 @@ void mp3_decoder__init(gpio_s xcs, gpio_s xdcs, gpio_s dreq, gpio_s rst) {
   mp3_decoder__sci(write, SCI_MODE, sci_mode_register_defaults);
   mp3_decoder__sci(write, SCI_CLKF, default_clockf_divide);
   mp3_decoder__sci(write, SCI_AUDATA, default_sample_11hz);
-  mp3_decoder__sci(write, SCI_VOLUME, 0x0101); // volume
+  mp3_decoder__sci(write, SCI_VOLUME, default_volume_70_percent);
 
   // setup i2s
   mp3_decoder__sci(write, SCI_WRAMADDR, 0xc017);
