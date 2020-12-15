@@ -108,6 +108,11 @@ static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS];
  *
  **********************************************************************************************************************/
 
+void game_logic__private_send_music_opcode(song_list_e opcode) {
+  uint8_t timeout_ms = 3;
+  uart__put(UART__3, opcode, timeout_ms);
+}
+
 void spawn_logic__private_spawn_enemy_bullets() {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     enemy_bullets_array[i].column_position = 0;
@@ -321,9 +326,9 @@ void game_logic__private_clear_laser_cannon_display_area(void) {
 void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
   uint32_t destroy_cannon_animation_duration_ms = 400;
 
+  game_logic__private_send_music_opcode(explosion);
   game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
   game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
-  game_logic__private_send_music_opcode(explosion);
   delay__ms(destroy_cannon_animation_duration_ms);
   game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
   game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
@@ -375,6 +380,7 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
                                                          cannon_bullets_array[i].column_position, BLACK);
               enemies_array[j - 1][k].is_valid = false;
               number_of_enemies_left--;
+              game_logic__private_send_music_opcode(invader_killed);
               game_graphics__display_score_board(score_board_number_row_offset, score_board_number_column_offset, BLACK,
                                                  overall_game_score);
               overall_game_score += enemies_array[j - 1][k].points;
@@ -383,13 +389,11 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
               is_enemy_kill_animation = true;
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, RED);
-              game_logic__private_send_music_opcode(explosion);
               delay__ms(kill_animation_duration_ms);
               game_graphics__display_explosion(enemies_array[j - 1][k].row_position,
                                                enemies_array[j - 1][k].column_position, BLACK);
               is_enemy_kill_animation = false;
               led_matrix__clear_display();
-              game_logic__private_send_music_opcode(invader_killed);
               break;
             }
           }
@@ -448,7 +452,6 @@ void game_logic__private_enemy_shoot_bullet(game_object_s *enemy) {
       enemy_bullets_array[i].row_position = enemy->row_position + row_offset_below_enemy;
       enemy_bullets_array[i].column_position =
           (enemy->column_position + (enemy->width / 2)) - column_offset_to_center_bullet;
-      game_logic__private_send_music_opcode(shoot_bullet);
       break;
     }
   }
@@ -471,11 +474,6 @@ void game_logic__private_update_enemy_bullet_location(void) {
     }
   }
   game_logic__private_detect_bullet_collision_from_enemy();
-}
-
-void game_logic__private_send_music_opcode(song_list_e opcode) {
-  uint8_t timeout_ms = 5;
-  uart__put(UART__3, opcode, timeout_ms);
 }
 
 /***********************************************************************************************************************
@@ -574,9 +572,8 @@ void game_logic__move_enemies(void) {
           }
         }
       }
-      game_logic__private_send_music_opcode(invader_move);
-      delay__ms(20);
       vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
+      game_logic__private_send_music_opcode(invader_move);
     } else {
       is_game_over = true;
     }
@@ -590,13 +587,13 @@ void game_logic__shoot_bullet(void) {
   const uint8_t offset_cannon_column_center = 6;
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
     if (cannon_bullets_array[i].is_valid == 0) {
+      game_logic__private_send_music_opcode(shoot_bullet);
       cannon_bullets_array[i].is_valid = 1;
       cannon_bullets_array[i].row_position = laser_cannon.row_position + offset_cannon_row_center;
       cannon_bullets_array[i].column_position = laser_cannon.column_position + offset_cannon_column_center;
       game_graphics__display_laser_cannon_bullet(cannon_bullets_array[i].row_position + cannon_bullets_array[i].height,
                                                  cannon_bullets_array[i].column_position,
                                                  cannon_bullets_array[i].color);
-      game_logic__private_send_music_opcode(shoot_bullet);
       break;
     }
   }

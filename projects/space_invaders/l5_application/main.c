@@ -22,7 +22,7 @@
 #include "lpc40xx.h"
 #include "lpc_peripherals.h"
 
-#define GAME_BOARD 0
+#define GAME_BOARD 1
 
 #if GAME_BOARD
 static SemaphoreHandle_t shooting_button_pressed;
@@ -185,8 +185,8 @@ static void game_over_screen_task(void *p) {
       game_graphics__display_game_over_screen();
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
-        vTaskResume(start_screen_task_handle);
         game_logic__set_game_over_status(false);
+        vTaskResume(start_screen_task_handle);
       }
     }
     vTaskDelay(3);
@@ -245,20 +245,60 @@ static void kill_animation_task(void *p) {
 
 #else
 
+// static void volume_control_task(void *p) {
+//   static uint16_t volume = 0x0101;
+//   uint16_t min_volume = 0xffff;
+//   uint16_t max_volume = 0x0101;
+//   while (1) {
+//     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
+//       if (volume >= 64535) {
+//         volume = min_volume;
+//       } else {
+//         volume += 1000;
+//       }
+//       printf("Volume Down: %u\n", volume);
+//       mp3_decoder__sci(write, SCI_VOLUME, volume);
+//     } else if (xSemaphoreTake(volume_up_button_pressed, 0)) {
+//       if (volume <= 1005) {
+//         volume = max_volume;
+//       } else {
+//         volume -= 1000;
+//       }
+//       printf("Volume Up: %u\n", volume);
+//       mp3_decoder__sci(write, SCI_VOLUME, volume);
+//     } else {
+//       // do nothing
+//     }
+//     vTaskDelay(3);
+//   }
+// }
+
 static void volume_control_task(void *p) {
+  static uint16_t volume = 0x01;
+  static uint8_t min_volume = 0xff;
+  static uint8_t max_volume = 0x01;
   while (1) {
-    static uint16_t volume = 0x0101;
     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
-      --volume;
-      mp3_decoder__sci(write, SCI_VOLUME, volume);
+      if (volume >= 235) {
+        volume = (min_volume << 8 | min_volume);
+      } else {
+        volume += 20;
+      }
+      printf("Volume Down: %u\n", volume);
+      mp3_decoder__sci(write, SCI_VOLUME, (volume << 8 | volume));
     } else if (xSemaphoreTake(volume_up_button_pressed, 0)) {
-      ++volume;
-      mp3_decoder__sci(write, SCI_VOLUME, volume);
+      if (volume <= 20) {
+        volume = (max_volume << 8 | max_volume);
+      } else {
+        volume -= 20;
+      }
+      printf("Volume Up: %u\n", volume);
+      mp3_decoder__sci(write, SCI_VOLUME, (volume << 8 | volume));
     } else {
       // do nothing
     }
+    vTaskDelay(3);
   }
-  vTaskDelay(3);
 }
 
 static void which_song_to_play_task(void *p) {
