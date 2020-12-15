@@ -323,6 +323,7 @@ void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
 
   game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
   game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, YELLOW);
+  game_logic__private_send_music_opcode(explosion);
   delay__ms(destroy_cannon_animation_duration_ms);
   game_graphics__display_explosion(laser_cannon.row_position, laser_cannon.column_position, BLACK);
   game_graphics__display_laser_cannon(laser_cannon.row_position, laser_cannon.column_position, BLACK);
@@ -345,7 +346,6 @@ void game_logic__private_detect_bullet_collision_from_enemy(void) {
         number_of_lives--;
         led_matrix_basic_graphics__display_number(5, 56, number_of_lives, ELECTRIC_BLUE);
         game_logic__private_display_laser_cannon_destroy_aninimation();
-        game_logic__private_send_music_opcode(explosion);
         if (number_of_lives == 0) {
           is_game_over = true;
         }
@@ -575,6 +575,7 @@ void game_logic__move_enemies(void) {
         }
       }
       game_logic__private_send_music_opcode(invader_move);
+      delay__ms(20);
       vTaskDelay(number_of_enemies_left * enemies_speed_delay_ms);
     } else {
       is_game_over = true;

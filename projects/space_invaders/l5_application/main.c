@@ -438,7 +438,7 @@ static void initialize_game_sound_board(void) {
   mp3_file_data = xQueueCreate(1, sizeof(char[512]));
   mp3_mutex = xSemaphoreCreateMutex();
   what_song_to_play = xQueueCreate(1, sizeof(char[32]));
-  
+
   gpio_s dreq = {GPIO__PORT_2, 0};
   gpio_s xcs = {GPIO__PORT_2, 2};
   gpio_s xdcs = {GPIO__PORT_2, 5};
