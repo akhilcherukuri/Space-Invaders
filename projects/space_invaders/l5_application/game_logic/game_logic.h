@@ -48,6 +48,7 @@ typedef enum {
   shoot_bullet = '2',
   explosion = '3',
   invader_move = '4',
+  start_song = '5',
 } song_list_e;
 
 /***********************************************************************************************************************
@@ -72,3 +73,4 @@ void game_logic__set_game_over_status(bool status);
 int game_logic__get_game_overall_score(void);
 int game_logic__get_laser_cannon_lives(void);
 bool game_logic__get_game_status_to_display_enemy_killed_animation(void);
+void game_logic__play_start_music(void);

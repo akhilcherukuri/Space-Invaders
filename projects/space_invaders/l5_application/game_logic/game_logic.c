@@ -108,7 +108,7 @@ static game_object_s cannon_bullets_array[MAX_NUM_OF_CANNON_BULLETS];
  *
  **********************************************************************************************************************/
 
-void game_logic__private_send_music_opcode(song_list_e opcode) {
+static void game_logic__private_send_music_opcode(song_list_e opcode) {
   uint8_t timeout_ms = 3;
   uart__put(UART__3, opcode, timeout_ms);
 }
@@ -128,7 +128,7 @@ void spawn_logic__private_spawn_enemy_bullets() {
   }
 }
 
-void game_logic__private_spawn_octupus(int starting_row) {
+static void game_logic__private_spawn_octupus(int starting_row) {
   uint8_t column_offset = 5;
   uint8_t row_offset = 12;
   uint8_t offset_between_rows = 1;
@@ -149,7 +149,7 @@ void game_logic__private_spawn_octupus(int starting_row) {
   }
 }
 
-void game_logic__private_spawn_crab(int starting_row) {
+static void game_logic__private_spawn_crab(int starting_row) {
   uint8_t column_offset = 5;
   uint8_t row_offset = 12;
   uint8_t offset_between_rows = 1;
@@ -630,6 +630,11 @@ void game_logic__check_valid_enemy_to_shoot_bullet(void) {
   }
   game_logic__private_update_enemy_bullet_location();
   vTaskDelay(bullet_speed);
+}
+
+void game_logic__play_start_music(void) {
+  uint8_t timeout_ms = 3;
+  uart__put(UART__3, start_song, timeout_ms);
 }
 
 bool game_logic__get_game_won_status(void) { return is_game_won; }

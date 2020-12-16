@@ -149,9 +149,14 @@ static void display_scoreboard_task(void *p) {
 }
 
 static void start_screen_task(void *p) {
+  static bool has_music_opcode_been_sent = false;
   while (1) {
     if (!is_game_started) {
       game_graphics__display_splash_screen();
+      if (!has_music_opcode_been_sent) {
+        game_logic__play_start_music();
+        has_music_opcode_been_sent = false;
+      }
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
         game_logic__reset_game();
@@ -321,6 +326,9 @@ static void which_song_to_play_task(void *p) {
     } else if (song_number == '4') {
       song_file = "fastinvader1.wav";
       xQueueSend(what_song_to_play, &song_file, 0);
+    } else if (song_number == '5') {
+      song_file = "spaceinvaders1.mpeg";
+      xQueueSend(what_song_to_play, &song_file, 0);
     } else {
       // do nothing
     }
@@ -340,6 +348,10 @@ void play_game_sound_task(void *p) {
       f_read(&file, bytes_512, 512, &bytes_read);
       xSemaphoreGive(mp3_mutex);
       xQueueSend(mp3_file_data, &bytes_512[0], portMAX_DELAY);
+      if (xQueueReceive(what_song_to_play, &song_file, 0)) {
+        f_close(&file);
+        f_open(&file, song_file, FA_READ);
+      }
     }
     f_close(&file);
     xQueueReceive(what_song_to_play, &song_file, portMAX_DELAY);
