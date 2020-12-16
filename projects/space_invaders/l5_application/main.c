@@ -274,15 +274,17 @@ static void kill_animation_task(void *p) {
 // }
 
 static void volume_control_task(void *p) {
-  static uint16_t volume = 0x01;
-  static uint8_t min_volume = 0xff;
-  static uint8_t max_volume = 0x01;
+  static uint16_t volume = 0x0101;
+  static uint8_t single_channel_volume = 0x01;
+  const uint8_t min_volume = 0xff;
+  const uint8_t max_volume = 0x01;
   while (1) {
     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
       if (volume >= 235) {
         volume = (min_volume << 8 | min_volume);
       } else {
-        volume += 20;
+        single_channel_volume += 5;
+        volume = (single_channel_volume << 8 | single_channel_volume);
       }
       printf("Volume Down: %u\n", volume);
       mp3_decoder__sci(write, SCI_VOLUME, (volume << 8 | volume));
@@ -290,10 +292,11 @@ static void volume_control_task(void *p) {
       if (volume <= 20) {
         volume = (max_volume << 8 | max_volume);
       } else {
-        volume -= 20;
+        single_channel_volume -= 5;
+        volume = (single_channel_volume << 8 | single_channel_volume);
       }
-      printf("Volume Up: %u\n", volume);
-      mp3_decoder__sci(write, SCI_VOLUME, (volume << 8 | volume));
+      printf("Volume Up: %x\n", volume);
+      mp3_decoder__sci(write, SCI_VOLUME, volume);
     } else {
       // do nothing
     }
