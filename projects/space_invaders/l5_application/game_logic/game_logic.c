@@ -113,7 +113,7 @@ static void game_logic__private_send_music_opcode(song_list_e opcode) {
   uart__put(UART__3, opcode, timeout_ms);
 }
 
-void spawn_logic__private_spawn_enemy_bullets() {
+static void spawn_logic__private_spawn_enemy_bullets() {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     enemy_bullets_array[i].column_position = 0;
     enemy_bullets_array[i].row_position = 0;
@@ -170,7 +170,7 @@ static void game_logic__private_spawn_crab(int starting_row) {
   }
 }
 
-void game_logic__private_spawn_squid(int starting_row) {
+static void game_logic__private_spawn_squid(int starting_row) {
   uint8_t column_offset = 6;
   uint8_t row_offset = 12;
   uint8_t offset_between_rows = 1;
@@ -315,7 +315,7 @@ static bool game_logic__private_determine_enemy_movement(void) {
   return true;
 }
 
-void game_logic__private_clear_laser_cannon_display_area(void) {
+static void game_logic__private_clear_laser_cannon_display_area(void) {
   for (uint8_t row = 53; row < 61; row++) {
     for (uint8_t column = 0; column < 64; column++) {
       led_matrix__clear_pixel(row, column);
@@ -323,7 +323,7 @@ void game_logic__private_clear_laser_cannon_display_area(void) {
   }
 }
 
-void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
+static void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
   uint32_t destroy_cannon_animation_duration_ms = 400;
 
   game_logic__private_send_music_opcode(explosion);
@@ -337,7 +337,7 @@ void game_logic__private_display_laser_cannon_destroy_aninimation(void) {
   laser_cannon.column_position = laser_cannon_start_column_position;
 }
 
-void game_logic__private_detect_bullet_collision_from_enemy(void) {
+static void game_logic__private_detect_bullet_collision_from_enemy(void) {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     if (enemy_bullets_array[i].is_valid) {
       if ((laser_cannon.column_position <= enemy_bullets_array[i].column_position + enemy_bullets_array[i].width) &&
@@ -360,7 +360,7 @@ void game_logic__private_detect_bullet_collision_from_enemy(void) {
   }
 }
 
-void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
+static void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void) {
   uint32_t kill_animation_duration_ms = 200;
 
   for (size_t i = 0; i < MAX_NUM_OF_CANNON_BULLETS; i++) {
@@ -403,7 +403,7 @@ void game_logic__private_detect_bullet_collision_from_laser_cannon_to_enemy(void
   }
 }
 
-bool game_logic__private_detect_enemy_bullet_is_valid(game_object_s *enemy, uint8_t row) {
+static bool game_logic__private_detect_enemy_bullet_is_valid(game_object_s *enemy, uint8_t row) {
   bool valid = false;
   int enemy_possible_routes = 0;
   int enemy_checks_done = 0;
@@ -443,7 +443,7 @@ bool game_logic__private_detect_enemy_bullet_is_valid(game_object_s *enemy, uint
   return valid;
 }
 
-void game_logic__private_enemy_shoot_bullet(game_object_s *enemy) {
+static void game_logic__private_enemy_shoot_bullet(game_object_s *enemy) {
   uint8_t row_offset_below_enemy = 6;
   uint8_t column_offset_to_center_bullet = 1;
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
@@ -457,7 +457,7 @@ void game_logic__private_enemy_shoot_bullet(game_object_s *enemy) {
   }
 }
 
-void game_logic__private_update_enemy_bullet_location(void) {
+static void game_logic__private_update_enemy_bullet_location(void) {
   for (size_t i = 0; i < MAX_NUM_OF_ENEMY_BULLETS; i++) {
     if (enemy_bullets_array[i].is_valid == true) {
       game_graphics__display_enemy_bullet(enemy_bullets_array[i].row_position, enemy_bullets_array[i].column_position,

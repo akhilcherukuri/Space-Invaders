@@ -22,7 +22,7 @@
 #include "lpc40xx.h"
 #include "lpc_peripherals.h"
 
-#define GAME_BOARD 1
+#define GAME_BOARD 0
 
 #if GAME_BOARD
 static SemaphoreHandle_t shooting_button_pressed;
@@ -49,6 +49,7 @@ static TaskHandle_t laser_cannon_shooting_task_handle;
 static TaskHandle_t enemy_shooting_task_handle;
 
 static bool is_game_started = false;
+static bool has_music_opcode_been_sent = false;
 #endif
 
 static uint64_t button_pressed_time = 0;
@@ -149,14 +150,13 @@ static void display_scoreboard_task(void *p) {
 }
 
 static void start_screen_task(void *p) {
-  static bool has_music_opcode_been_sent = false;
   while (1) {
     if (!is_game_started) {
       game_graphics__display_splash_screen();
-      if (!has_music_opcode_been_sent) {
-        game_logic__play_start_music();
-        has_music_opcode_been_sent = false;
-      }
+      // if (!has_music_opcode_been_sent) {
+      //   game_logic__play_start_music();
+      //   has_music_opcode_been_sent = true;
+      // }
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
         game_logic__reset_game();
@@ -176,6 +176,7 @@ static void victory_screen_task(void *p) {
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         game_logic__set_game_won_status(false);
+        // has_music_opcode_been_sent = false;
         vTaskResume(start_screen_task_handle);
       }
     }
@@ -191,6 +192,7 @@ static void game_over_screen_task(void *p) {
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         game_logic__set_game_over_status(false);
+        // has_music_opcode_been_sent = false;
         vTaskResume(start_screen_task_handle);
       }
     }
@@ -247,60 +249,28 @@ static void kill_animation_task(void *p) {
     vTaskDelay(3);
   }
 }
-
 #else
-
-// static void volume_control_task(void *p) {
-//   static uint16_t volume = 0x0101;
-//   uint16_t min_volume = 0xffff;
-//   uint16_t max_volume = 0x0101;
-//   while (1) {
-//     if (xSemaphoreTake(volume_down_button_pressed, 0)) {
-//       if (volume >= 64535) {
-//         volume = min_volume;
-//       } else {
-//         volume += 1000;
-//       }
-//       printf("Volume Down: %u\n", volume);
-//       mp3_decoder__sci(write, SCI_VOLUME, volume);
-//     } else if (xSemaphoreTake(volume_up_button_pressed, 0)) {
-//       if (volume <= 1005) {
-//         volume = max_volume;
-//       } else {
-//         volume -= 1000;
-//       }
-//       printf("Volume Up: %u\n", volume);
-//       mp3_decoder__sci(write, SCI_VOLUME, volume);
-//     } else {
-//       // do nothing
-//     }
-//     vTaskDelay(3);
-//   }
-// }
-
 static void volume_control_task(void *p) {
   static uint16_t volume = 0x0101;
   static uint8_t single_channel_volume = 0x01;
   const uint8_t min_volume = 0xff;
   const uint8_t max_volume = 0x01;
   while (1) {
-    if (xSemaphoreTake(volume_down_button_pressed, 0)) {
+    if (xSemaphoreTake(volume_down_button_pressed, 5)) {
       if (volume >= 235) {
         volume = (min_volume << 8 | min_volume);
       } else {
         single_channel_volume += 5;
         volume = (single_channel_volume << 8 | single_channel_volume);
       }
-      printf("Volume Down: %u\n", volume);
-      mp3_decoder__sci(write, SCI_VOLUME, (volume << 8 | volume));
-    } else if (xSemaphoreTake(volume_up_button_pressed, 0)) {
+      mp3_decoder__sci(write, SCI_VOLUME, volume);
+    } else if (xSemaphoreTake(volume_up_button_pressed, 5)) {
       if (volume <= 20) {
         volume = (max_volume << 8 | max_volume);
       } else {
         single_channel_volume -= 5;
         volume = (single_channel_volume << 8 | single_channel_volume);
       }
-      printf("Volume Up: %x\n", volume);
       mp3_decoder__sci(write, SCI_VOLUME, volume);
     } else {
       // do nothing
@@ -327,7 +297,7 @@ static void which_song_to_play_task(void *p) {
       song_file = "fastinvader1.wav";
       xQueueSend(what_song_to_play, &song_file, 0);
     } else if (song_number == '5') {
-      song_file = "spaceinvaders1.mpeg";
+      song_file = "spaceinvaders2.wav";
       xQueueSend(what_song_to_play, &song_file, 0);
     } else {
       // do nothing
