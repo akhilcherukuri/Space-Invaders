@@ -22,7 +22,7 @@
 #include "lpc40xx.h"
 #include "lpc_peripherals.h"
 
-#define GAME_BOARD 0
+#define GAME_BOARD 1
 
 #if GAME_BOARD
 static SemaphoreHandle_t shooting_button_pressed;
@@ -49,7 +49,6 @@ static TaskHandle_t laser_cannon_shooting_task_handle;
 static TaskHandle_t enemy_shooting_task_handle;
 
 static bool is_game_started = false;
-static bool has_music_opcode_been_sent = false;
 #endif
 
 static uint64_t button_pressed_time = 0;
@@ -153,10 +152,6 @@ static void start_screen_task(void *p) {
   while (1) {
     if (!is_game_started) {
       game_graphics__display_splash_screen();
-      // if (!has_music_opcode_been_sent) {
-      //   game_logic__play_start_music();
-      //   has_music_opcode_been_sent = true;
-      // }
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         is_game_started = true;
         game_logic__reset_game();
@@ -176,7 +171,6 @@ static void victory_screen_task(void *p) {
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         game_logic__set_game_won_status(false);
-        // has_music_opcode_been_sent = false;
         vTaskResume(start_screen_task_handle);
       }
     }
@@ -192,7 +186,6 @@ static void game_over_screen_task(void *p) {
       is_game_started = false;
       if (xSemaphoreTake(start_button_pressed, portMAX_DELAY)) {
         game_logic__set_game_over_status(false);
-        // has_music_opcode_been_sent = false;
         vTaskResume(start_screen_task_handle);
       }
     }
