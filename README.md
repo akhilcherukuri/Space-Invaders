@@ -7,8 +7,8 @@ Space Invaders is a fixed one person shooter style video game. The player contro
 ----
 ## Build and flash the project
 
-**Build command:** scons --project=space_invaders
-**Flash command:** python nxp-programmer/flash.py -i _build_space_invaders/space_invaders.bin                                                             
+- **Build command:** scons --project=space_invaders
+- **Flash command:** python nxp-programmer/flash.py -i _build_space_invaders/space_invaders.bin                                                             
 
 ----
 ## SJ2-C Development Environment
