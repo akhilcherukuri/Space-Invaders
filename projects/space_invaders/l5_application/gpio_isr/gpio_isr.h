@@ -6,6 +6,7 @@
  **********************************************************************************************************************/
 /* Standard Includes */
 #include <stdint.h>
+#include <stdio.h>
 
 /* External Includes */
 
@@ -16,34 +17,27 @@
  *                                                   D E F I N E S
  *
  **********************************************************************************************************************/
-#define MATRIX_HEIGHT 64
-#define MATRIX_WIDTH 64
-#define MATRIX_ROWS 32
 
-uint8_t matrix_buffer[MATRIX_ROWS][MATRIX_HEIGHT];
 /***********************************************************************************************************************
  *
  *                                                  T Y P E D E F S
  *
  **********************************************************************************************************************/
 typedef enum {
-  BLACK = 0,
-  BLUE = 1,
-  GREEN = 2,
-  ELECTRIC_BLUE = 3,
-  RED = 4,
-  PURPLE = 5,
-  YELLOW = 6,
-  WHITE = 7
-} led_color_e;
+  GPIO_INTR__FALLING_EDGE,
+  GPIO_INTR__RISING_EDGE,
+} gpio_interrupt_e;
+
+typedef void (*function_pointer_t)(void);
 /***********************************************************************************************************************
  *
  *                                     F U N C T I O N   D E C L A R A T I O N S
  *
  **********************************************************************************************************************/
 
-void led_matrix__initialize(void);
-void led_matrix__display_pixels(void);
-void led_matrix__clear_display(void);
-void led_matrix__set_pixel(uint8_t row, uint8_t column, led_color_e color);
-void led_matrix__clear_pixel(uint8_t row, uint8_t column);
+/* Allow the user to attach their callbacks */
+void gpio_isr__attach_interrupt(uint8_t port, uint32_t pin, gpio_interrupt_e interrupt_type,
+                                function_pointer_t callback);
+
+/* main() should configure interrupts to invoke this dispatcher where we will invoke user attached callbacks */
+void gpio_isr__interrupt_dispatcher(void);
